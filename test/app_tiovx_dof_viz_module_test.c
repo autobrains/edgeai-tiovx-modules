@@ -242,8 +242,8 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/avp3_1280x720_flow_vector_u32.raw";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/output_dof_viz_rgb.raw";
+    char * input_filename = EDGEAI_DATA_PATH"/raw_images/avp3_1280x720_flow_vector_u32.raw";
+    char * output_filename = EDGEAI_DATA_PATH"/output/output_dof_viz_rgb.raw";
 
     vx_image  input_o;
     vx_image  output_o;

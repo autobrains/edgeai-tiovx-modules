@@ -27,7 +27,12 @@ if (NOT DEFINED ENV{SOC})
     message(FATAL_ERROR "SOC not defined.")
 endif()
 
+if (NOT DEFINED ENV{EDGEAI_DATA_PATH})
+    message(FATAL_ERROR "EDGEAI_DATA_PATH not defined.")
+endif()
+
 set(TARGET_SOC_LOWER $ENV{SOC})
+set(EDGEAI_DATA_PATH $ENV{EDGEAI_DATA_PATH})
 
 if ("${TARGET_SOC_LOWER}" STREQUAL "j721e")
     set(TARGET_PLATFORM     J7)
@@ -59,6 +64,7 @@ add_definitions(
     -DTARGET_CPU=${TARGET_CPU}
     -DTARGET_OS=${TARGET_OS}
     -DSOC_${TARGET_SOC}
+    -DEDGEAI_DATA_PATH="${EDGEAI_DATA_PATH}"
 )
 
 link_directories(${TARGET_FS}/usr/lib/aarch64-linux
@@ -118,17 +124,9 @@ function(build_app app_name)
     set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
     set(BINS ${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}/${app_name})
 
-    set(TEST_DATA_INSTALL_DIR /opt/${PROJECT_NAME}/data/input)
-    FILE(GLOB TEST_DATA ${CMAKE_CURRENT_SOURCE_DIR}/../data/input/*)
-
     install(FILES ${BINS}
             PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
             DESTINATION ${BIN_INSTALL_DIR})
-
-    install(FILES ${TEST_DATA}
-            DESTINATION ${TEST_DATA_INSTALL_DIR})
-
-    install(DIRECTORY DESTINATION ${TEST_DATA_INSTALL_DIR}/../output)
 
 endfunction()
 

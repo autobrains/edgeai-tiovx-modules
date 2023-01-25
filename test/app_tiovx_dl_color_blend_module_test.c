@@ -269,9 +269,9 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_image_filename = "/opt/edgeai-tiovx-modules/data/input/baboon_640x480_rgb.bmp";
-    char * input_tensor_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_mask";
-    char * output_image_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_out_640x480_rgb.bmp";
+    char * input_image_filename = EDGEAI_DATA_PATH"/raw_images/baboon_640x480_rgb.bmp";
+    char * input_tensor_filename = EDGEAI_DATA_PATH"/output/baboon_mask";
+    char * output_image_filename = EDGEAI_DATA_PATH"/output/baboon_out_640x480_rgb.bmp";
 
     vx_image input_o, output_o;
     vx_tensor tensor_o;

@@ -234,8 +234,8 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/baboon_640x480_rgb.bmp";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_640x480_i420.yuv";
+    char * input_filename = EDGEAI_DATA_PATH"/raw_images/baboon_640x480_rgb.bmp";
+    char * output_filename = EDGEAI_DATA_PATH"/output/baboon_640x480_i420.yuv";
 
     vx_image input_o, output_o;
 
