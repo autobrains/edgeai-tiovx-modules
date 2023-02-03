@@ -27,12 +27,7 @@ if (NOT DEFINED ENV{SOC})
     message(FATAL_ERROR "SOC not defined.")
 endif()
 
-if (NOT DEFINED ENV{EDGEAI_DATA_PATH})
-    message(FATAL_ERROR "EDGEAI_DATA_PATH not defined.")
-endif()
-
 set(TARGET_SOC_LOWER $ENV{SOC})
-set(EDGEAI_DATA_PATH $ENV{EDGEAI_DATA_PATH})
 
 if ("${TARGET_SOC_LOWER}" STREQUAL "j721e")
     set(TARGET_PLATFORM     J7)
@@ -64,7 +59,6 @@ add_definitions(
     -DTARGET_CPU=${TARGET_CPU}
     -DTARGET_OS=${TARGET_OS}
     -DSOC_${TARGET_SOC}
-    -DEDGEAI_DATA_PATH="${EDGEAI_DATA_PATH}"
 )
 
 link_directories(${TARGET_FS}/usr/lib/aarch64-linux

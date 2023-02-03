@@ -278,9 +278,13 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = EDGEAI_DATA_PATH"/raw_images/baboon_640x480_nv12.yuv";
-    char * output0_filename = EDGEAI_DATA_PATH"/output/baboon_320x240_nv12_msc_out0.yuv";
-    char * output1_filename = EDGEAI_DATA_PATH"/output/baboon_160x120_nv12_msc_out1.yuv";
+    char input_filename[100];
+    char output0_filename[100];
+    char output1_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/baboon_640x480_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(output0_filename, "%s/output/baboon_320x240_nv12_msc_out0.yuv", EDGEAI_DATA_PATH);
+    sprintf(output1_filename, "%s/output/baboon_160x120_nv12_msc_out1.yuv", EDGEAI_DATA_PATH);
 
     vx_image input_o, output0_o, output1_o;
 

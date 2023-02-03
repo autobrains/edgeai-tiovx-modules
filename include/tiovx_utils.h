@@ -122,6 +122,8 @@ extern "C" {
 
 #define ALIGN_STRIDE64(width) ((((width) + 32)/64)*64)
 
+extern char *EDGEAI_DATA_PATH;
+
 vx_status add_graph_parameter_by_node_index(vx_graph graph, vx_node node, vx_uint32 node_parameter_index);
 
 vx_status allocate_single_image_buffer(vx_image image, void *virtAddr[], vx_uint32 sizes[]);

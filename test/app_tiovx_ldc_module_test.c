@@ -157,7 +157,7 @@ static vx_status app_init(AppObj *obj)
         tiovx_init_sensor(sensorObj,"SENSOR_SONY_IMX390_UB953_D3");
 
         snprintf(ldcObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx390/dcc_ldc_wdr.bin");
-        snprintf(ldcObj->lut_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", EDGEAI_DATA_PATH"/raw_images/imx390_ldc_lut_1920x1080.bin");
+        snprintf(ldcObj->lut_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s/raw_images/imx390_ldc_lut_1920x1080.bin", EDGEAI_DATA_PATH);
 
         ldcObj->ldc_mode = TIOVX_MODULE_LDC_OP_MODE_DCC_DATA; //TIOVX_MODULE_LDC_OP_MODE_MESH_IMAGE
         ldcObj->en_out_image_write = 0;
@@ -278,8 +278,11 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = EDGEAI_DATA_PATH"/raw_images/imx390_fisheye_1936x1096_nv12.yuv";
-    char * output_filename = EDGEAI_DATA_PATH"/output/imx390_rectified_1920x1080_nv12.yuv";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/imx390_fisheye_1936x1096_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/imx390_rectified_1920x1080_nv12.yuv", EDGEAI_DATA_PATH);
 
     vx_image input_o, output_o;
 

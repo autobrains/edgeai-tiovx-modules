@@ -244,8 +244,11 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = EDGEAI_DATA_PATH"/raw_images/avp3_1280x720_0_nv12.yuv";
-    char * output_filename_template = EDGEAI_DATA_PATH"/output/output_pyramid_level_%d_u8.gray";
+    char input_filename[100];
+    char output_filename_template[100];
+
+    sprintf(input_filename, "%s/raw_images/avp3_1280x720_0_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(output_filename_template, "%s/output/output_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
 
     vx_image   input_o;
     vx_pyramid output_o;

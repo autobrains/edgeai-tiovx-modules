@@ -453,11 +453,17 @@ static vx_status app_run_graph(AppObj *obj)
     vx_status status = VX_SUCCESS;
 
 #if defined(SOC_AM62A)
-    char * input_filename = EDGEAI_DATA_PATH"/raw_images/ov2312_raw/rgbir/frame-1-000001.bin";
-    char * output_filename = EDGEAI_DATA_PATH"/output/ov2312-rgbir-1600x1300-frame-1-000001.nv12";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/ov2312_raw/rgbir/frame-1-000001.bin", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/ov2312-rgbir-1600x1300-frame-1-000001.nv12", EDGEAI_DATA_PATH);
 #else
-    char * input_filename = EDGEAI_DATA_PATH"/raw_images/imx219_1920x1080_capture.raw";
-    char * output_filename = EDGEAI_DATA_PATH"/output/imx219_1920x1080_capture_nv12.yuv";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/imx219_1920x1080_capture.raw", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/imx219_1920x1080_capture_nv12.yuv", EDGEAI_DATA_PATH);
 #endif
 
     tivx_raw_image input_o;

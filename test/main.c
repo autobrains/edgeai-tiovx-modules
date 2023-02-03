@@ -60,12 +60,15 @@
  *
  */
 
+#include <tiovx_utils.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdint.h>
 #include <TI/tivx.h>
 #include <app_init.h>
+#include <stdlib.h>
 
 #define APP_MODULES_TEST_MULTI_SCALER (1)
 #define APP_MODULES_TEST_IMG_MOSAIC (1)
@@ -83,6 +86,8 @@
 #define APP_MODULES_TEST_SDE (1)
 #define APP_MODULES_TEST_SDE_VIZ (1)
 #endif
+
+char *EDGEAI_DATA_PATH;
 
 int32_t appInit()
 {
@@ -112,6 +117,12 @@ int32_t appDeInit()
 int main(int argc, char *argv[])
 {
     int status = 0;
+
+    EDGEAI_DATA_PATH = getenv("EDGEAI_DATA_PATH");
+    if (EDGEAI_DATA_PATH == NULL)
+    {
+      APP_ERROR("EDGEAI_DATA_PATH Not Defined!!\n");
+    }
 
     status = appInit();
 
