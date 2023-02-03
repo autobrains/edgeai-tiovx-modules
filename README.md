@@ -10,7 +10,7 @@ These modules are used by edgeai-gst-plugins https://github.com/TexasInstruments
 ## Steps to clone and build on target
 clone the repo under '/opt'
 ```
-/opt# git clone https://github.com/TexasInstruments/edgeai-tiovx-modules.git
+/opt# git clone https://git.ti.com/cgit/edgeai/edgeai-tiovx-modules
 ```
 
 ### Compilation on the target
@@ -54,7 +54,7 @@ Here 'work_area' is used as the root directory for illustration.
 
 ```
 cd work_area
-git clone https://github.com/TexasInstruments/edgeai-tiovx-modules.git
+git clone https://git.ti.com/cgit/edgeai/edgeai-tiovx-modules
 cd edgeai-tiovx-modules
 # Update cmake/setup_cross_compile.sh to specify tool paths and settings
 mkdir build
