@@ -70,10 +70,6 @@ link_directories(${TARGET_FS}/usr/lib/aarch64-linux
 
 include_directories(${PROJECT_SOURCE_DIR}
                     ${PROJECT_SOURCE_DIR}/include
-                    ${TARGET_FS}/usr/local/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/rtos/common
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/rtos/common_linux
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/linux
                     ${TARGET_FS}/usr/include/processor_sdk/ivision
                     ${TARGET_FS}/usr/include/processor_sdk/imaging
                     ${TARGET_FS}/usr/include/processor_sdk/ti-perception-toolkit/include

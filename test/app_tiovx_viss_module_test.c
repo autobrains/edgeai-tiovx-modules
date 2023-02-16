@@ -456,8 +456,8 @@ static vx_status app_run_graph(AppObj *obj)
     char input_filename[100];
     char output_filename[100];
 
-    sprintf(input_filename, "%s/raw_images/ov2312_raw/rgbir/frame-1-000001.bin", EDGEAI_DATA_PATH);
-    sprintf(output_filename, "%s/output/ov2312-rgbir-1600x1300-frame-1-000001.nv12", EDGEAI_DATA_PATH);
+    sprintf(input_filename, "%s/raw_images/ov2312_1600x1300_capture.raw", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/ov2312_1600x1300_capture_nv12.yuv", EDGEAI_DATA_PATH);
 #else
     char input_filename[100];
     char output_filename[100];
@@ -529,7 +529,7 @@ static vx_status app_run_graph(AppObj *obj)
     frame_count = 0;
     while (frame_count < NUM_ITERATIONS)
     {
-        APP_ERROR("Running frame %d\n", frame_count);
+        APP_PRINTF("Running frame %d\n", frame_count);
         readRawImage(input_filename, vissObj->input.image_handle[0]);
 
         APP_PRINTF("Enqueueing input raw buffers!\n");
@@ -555,11 +555,11 @@ static vx_status app_run_graph(AppObj *obj)
         APP_PRINTF("Processing!\n");
         status = vxScheduleGraph(obj->graph);
         if((vx_status)VX_SUCCESS != status) {
-            APP_PRINTF("Schedule Graph failed: %d!\n", status);
+            APP_ERROR("Schedule Graph failed: %d!\n", status);
         }
         status = vxWaitGraph(obj->graph);
         if((vx_status)VX_SUCCESS != status) {
-            APP_PRINTF("Wait Graph failed: %d!\n", status);
+            APP_ERROR("Wait Graph failed: %d!\n", status);
         }
 
         vxGraphParameterDequeueDoneRef(obj->graph, vissObj->input.graph_parameter_index, (vx_reference*)&input_o, 1, &num_refs);

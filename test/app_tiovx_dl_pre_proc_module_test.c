@@ -311,11 +311,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);
