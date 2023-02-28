@@ -70,6 +70,7 @@
 #define APP_MODULES_TEST_IMG_MOSAIC (1)
 #define APP_MODULES_TEST_LDC (1)
 #define APP_MODULES_TEST_VISS (1)
+#define APP_MODULES_TEST_VISS_LDC_MSC (1)
 #define APP_MODULES_TEST_PYRAMID (1)
 
 #if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
@@ -224,6 +225,16 @@ int main(int argc, char *argv[])
         int app_modules_sde_viz_test(int argc, char* argv[]);
 
         status = app_modules_sde_viz_test(argc, argv);
+    }
+#endif
+
+#if (APP_MODULES_TEST_VISS_LDC_MSC)
+    if(status==0)
+    {
+        printf("Running VISS-LDC-MSC module test\n");
+        int app_modules_viss_msc_ldc_test(int argc, char* argv[]);
+
+        status = app_modules_viss_msc_ldc_test(argc, argv);
     }
 #endif
 
