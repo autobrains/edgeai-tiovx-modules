@@ -131,55 +131,57 @@ static vx_status tiovx_ldc_module_configure_mesh_params(vx_context context, TIOV
     table_width_ds = (((obj->table_width / (1 << obj->ds_factor)) + 1u) + 15u) & (~15u);
     table_height_ds = ((obj->table_height / (1 << obj->ds_factor)) + 1u);
 
-
-    /* Mesh Image */
-    obj->mesh_img = vxCreateImage(context, table_width_ds, table_height_ds, VX_DF_IMAGE_U32);
-    status = vxGetStatus((vx_reference)obj->mesh_img);
-
-    if((vx_status)VX_SUCCESS == status)
+    if (obj->lut_file_path[0] != '\0')
     {
-        /* Read LUT file */
-        status = readImage(obj->lut_file_path, obj->mesh_img);
+        /* Mesh Image */
+        obj->mesh_img = vxCreateImage(context, table_width_ds, table_height_ds, VX_DF_IMAGE_U32);
+        status = vxGetStatus((vx_reference)obj->mesh_img);
 
-        if (status == VX_SUCCESS)
+        if((vx_status)VX_SUCCESS == status)
         {
-            /* Mesh Parameters */
-            memset(&obj->mesh_params, 0, sizeof(tivx_vpac_ldc_mesh_params_t));
+            /* Read LUT file */
+            status = readImage(obj->lut_file_path, obj->mesh_img);
+        }
+        else
+        {
+            TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to create mesh image! \n");
+        }
+    }
 
-            tivx_vpac_ldc_mesh_params_init(&obj->mesh_params);
+    if (status == VX_SUCCESS)
+    {
+        /* Mesh Parameters */
+        memset(&obj->mesh_params, 0, sizeof(tivx_vpac_ldc_mesh_params_t));
 
-            obj->mesh_params.mesh_frame_width  = obj->table_width;
-            obj->mesh_params.mesh_frame_height = obj->table_height;
-            obj->mesh_params.subsample_factor  = obj->ds_factor;
+        tivx_vpac_ldc_mesh_params_init(&obj->mesh_params);
 
-            obj->mesh_config = vxCreateUserDataObject(context, "tivx_vpac_ldc_mesh_params_t", sizeof(tivx_vpac_ldc_mesh_params_t), NULL);
-            status = vxGetStatus((vx_reference)obj->mesh_config);
+        obj->mesh_params.mesh_frame_width  = obj->table_width;
+        obj->mesh_params.mesh_frame_height = obj->table_height;
+        obj->mesh_params.subsample_factor  = obj->ds_factor;
 
-            if((vx_status)VX_SUCCESS == status)
+        obj->mesh_config = vxCreateUserDataObject(context, "tivx_vpac_ldc_mesh_params_t", sizeof(tivx_vpac_ldc_mesh_params_t), NULL);
+        status = vxGetStatus((vx_reference)obj->mesh_config);
+
+        if((vx_status)VX_SUCCESS == status)
+        {
+            status = vxCopyUserDataObject(obj->mesh_config, 0,
+                                sizeof(tivx_vpac_ldc_mesh_params_t),
+                                &obj->mesh_params,
+                                VX_WRITE_ONLY,
+                                VX_MEMORY_TYPE_HOST);
+            if(status != VX_SUCCESS)
             {
-                status = vxCopyUserDataObject(obj->mesh_config, 0,
-                                    sizeof(tivx_vpac_ldc_mesh_params_t),
-                                    &obj->mesh_params,
-                                    VX_WRITE_ONLY,
-                                    VX_MEMORY_TYPE_HOST);
-                if(status != VX_SUCCESS)
-                {
-                    TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to copy mesh params into buffer! \n");
-                }
-            }
-            else
-            {
-                TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to create mesh config object! \n");
+                TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to copy mesh params into buffer! \n");
             }
         }
         else
         {
-            TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to copy mesh image! \n");
+            TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to create mesh config object! \n");
         }
     }
     else
     {
-        TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to create mesh image! \n");
+        TIOVX_MODULE_ERROR("[LDC-MODULE] Unable to copy mesh image! \n");
     }
 
     return status;
