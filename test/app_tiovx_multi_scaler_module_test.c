@@ -162,10 +162,10 @@ static vx_status app_init(AppObj *obj)
 
         tiovx_multi_scaler_module_crop_params_init(scalerObj);
 
-        scalerObj->crop_params[0].crop_start_x = 0;
-        scalerObj->crop_params[0].crop_start_y = 0;
-        scalerObj->crop_params[0].crop_width = 320;
-        scalerObj->crop_params[0].crop_height = 240;
+        scalerObj->crop_params[0].crop_start_x = INPUT_WIDTH >> 2;
+        scalerObj->crop_params[0].crop_start_y = INPUT_HEIGHT >> 2;
+        scalerObj->crop_params[0].crop_width = INPUT_WIDTH >> 1;
+        scalerObj->crop_params[0].crop_height = INPUT_HEIGHT >> 1;
 
         /* Initialize modules */
         status = tiovx_multi_scaler_module_init(obj->context, scalerObj);
