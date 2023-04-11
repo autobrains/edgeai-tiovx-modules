@@ -63,11 +63,11 @@
 #define _TIOVX_SENSOR_MODULE
 
 /**
- * \defgroup group_vision_apps_modules_sensor Sensor Module
+ * \defgroup group_tiovx_modules_sensor Sensor Module
  *
  * \brief This section contains module APIs for the image sensor framework
  *
- * \ingroup group_vision_apps_modules
+ * \ingroup group_tiovx_modules
  *
  * @{
  */

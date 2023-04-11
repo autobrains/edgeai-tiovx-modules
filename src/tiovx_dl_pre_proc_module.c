@@ -65,7 +65,7 @@ static vx_status tiovx_dl_pre_proc_module_create_config(vx_context context, TIOV
 {
     vx_status status = VX_SUCCESS;
 
-    tivxDLPreProcParams *params;
+    tivxDLPreProcArmv8Params *params;
     vx_map_id map_id;
 
     obj->config = vxCreateUserDataObject(context, "tivxDLPreProcArmv8Params", sizeof(tivxDLPreProcArmv8Params), NULL );
@@ -75,7 +75,7 @@ static vx_status tiovx_dl_pre_proc_module_create_config(vx_context context, TIOV
     {
         vxSetReferenceName((vx_reference)obj->config, "dl_pre_proc_config");
 
-        vxMapUserDataObject(obj->config, 0, sizeof(tivxDLPreProcParams), &map_id,
+        vxMapUserDataObject(obj->config, 0, sizeof(tivxDLPreProcArmv8Params), &map_id,
                         (void **)&params, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
         memcpy(params, &obj->params, sizeof(tivxDLPreProcArmv8Params));
