@@ -173,6 +173,42 @@ typedef struct {
 
 } DstObj;
 
+static inline vx_enum get_vx_tensor_datatype(int32_t tidl_datatype)
+{
+    vx_enum tiovx_datatype = VX_TYPE_INVALID;
+
+    if(tidl_datatype == TIDL_UnsignedChar)
+    {
+        tiovx_datatype = VX_TYPE_UINT8;
+    }
+    else if(tidl_datatype == TIDL_SignedChar)
+    {
+        tiovx_datatype = VX_TYPE_INT8;
+    }
+    else if(tidl_datatype == TIDL_UnsignedShort)
+    {
+        tiovx_datatype = VX_TYPE_UINT16;
+    }
+    else if(tidl_datatype == TIDL_SignedShort)
+    {
+        tiovx_datatype = VX_TYPE_INT16;
+    }
+    else if(tidl_datatype == TIDL_UnsignedWord)
+    {
+        tiovx_datatype = VX_TYPE_UINT32;
+    }
+    else if(tidl_datatype == TIDL_SignedWord)
+    {
+        tiovx_datatype = VX_TYPE_INT32;
+    }
+    else if(tidl_datatype == TIDL_SinglePrecFloat)
+    {
+        tiovx_datatype = VX_TYPE_FLOAT32;
+    }
+
+    return (tiovx_datatype);
+}
+
 #ifdef __cplusplus
 }
 #endif
