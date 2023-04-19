@@ -73,6 +73,7 @@
  */
 
 #include "tiovx_modules_common.h"
+#include <TI/hwa_vpac_msc.h>
 
 #ifdef __cplusplus
 extern "C" {
