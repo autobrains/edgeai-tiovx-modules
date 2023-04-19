@@ -477,7 +477,7 @@ vx_status tiovx_tidl_module_add_write_output_node(vx_graph graph, TIOVXTIDLModul
 
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(tidlObj->write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(tidlObj->write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, tidlObj->write_node, replicate, 3);

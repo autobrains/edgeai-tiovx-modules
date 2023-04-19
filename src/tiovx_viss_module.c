@@ -1467,7 +1467,7 @@ vx_status tiovx_viss_module_add_write_output_node(vx_graph graph, TIOVXVISSModul
     status = vxGetStatus((vx_reference)obj->img_write_node);
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(obj->img_write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(obj->img_write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, obj->img_write_node, replicate, 3);
@@ -1487,7 +1487,7 @@ vx_status tiovx_viss_module_add_write_output_node(vx_graph graph, TIOVXVISSModul
         status = vxGetStatus((vx_reference)obj->h3a_write_node);
         if((vx_status)VX_SUCCESS == status)
         {
-            vxSetNodeTarget(obj->h3a_write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+            vxSetNodeTarget(obj->h3a_write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
             vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
             vxReplicateNode(graph, obj->h3a_write_node, replicate, 3);

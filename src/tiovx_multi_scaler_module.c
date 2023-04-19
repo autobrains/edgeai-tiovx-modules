@@ -732,7 +732,7 @@ vx_status tiovx_multi_scaler_module_add_write_output_node(vx_graph graph, TIOVXM
 
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(obj->write_node[out], VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(obj->write_node[out], VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, obj->write_node[out], replicate, 3);

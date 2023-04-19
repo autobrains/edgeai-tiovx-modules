@@ -189,7 +189,7 @@ static vx_status app_create_graph(AppObj *obj)
 
     if((vx_status)VX_SUCCESS == status)
     {
-        status = tiovx_dl_color_convert_module_create(obj->graph, &obj->colorConvertObj, NULL, TIVX_TARGET_A72_0);
+        status = tiovx_dl_color_convert_module_create(obj->graph, &obj->colorConvertObj, NULL, TIVX_TARGET_MPU_0);
     }
 
     graph_parameter_index = 0;
