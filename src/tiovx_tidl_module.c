@@ -531,9 +531,6 @@ static vx_status tiovx_tidl_module_create_config(vx_context context, TIOVXTIDLMo
     tivxTIDLJ7Params *params;
     vx_map_id map_id;
 
-    obj->config = vxCreateUserDataObject(context, "tivxTIDLJ7Params", sizeof(tivxTIDLJ7Params), NULL );
-    status = vxGetStatus((vx_reference)obj->config);
-
     if (VX_SUCCESS == status)
     {
         vxSetReferenceName((vx_reference)obj->config, "tidl_node_config");
@@ -541,7 +538,10 @@ static vx_status tiovx_tidl_module_create_config(vx_context context, TIOVXTIDLMo
         vxMapUserDataObject(obj->config, 0, sizeof(tivxTIDLJ7Params), &map_id,
                         (void **)&params, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
-        memcpy(params, &obj->params, sizeof(tivxTIDLJ7Params));
+        params->compute_config_checksum  = 0;
+        params->compute_network_checksum = 0;
+
+        memcpy(&obj->params, params, sizeof(tivxTIDLJ7Params));
 
         vxUnmapUserDataObject(obj->config, map_id);
     }
@@ -564,7 +564,7 @@ static vx_status tiovx_tidl_module_create_network(vx_context context, TIOVXTIDLM
 
     if(fp_network == NULL)
     {
-        TIOVX_MODULE_ERROR("[TIDL-MODULE] Unable to open file! %s \n", &obj->network_file_path[0]);
+        TIOVX_MODULE_ERROR("[TIDL-MODULE] Unable to open file! %s \n", obj->network_file_path);
         return VX_FAILURE;
     }
 
@@ -795,11 +795,11 @@ static vx_status tiovx_tidl_module_create_inputs(vx_context context, TIOVXTIDLMo
 
         for(in = 0; in < obj->num_input_tensors; in++)
         {
-            obj->output[in].num_dims = 3;
-            obj->output[in].dim_sizes[0] = tensor_sizes[0];
-            obj->output[in].dim_sizes[1] = tensor_sizes[1];
-            obj->output[in].dim_sizes[2] = tensor_sizes[2];
-            obj->output[in].datatype = get_vx_tensor_datatype(ioBufDesc->inElementType[id]);
+            obj->input[in].num_dims = 3;
+            obj->input[in].dim_sizes[0] = tensor_sizes[0];
+            obj->input[in].dim_sizes[1] = tensor_sizes[1];
+            obj->input[in].dim_sizes[2] = tensor_sizes[2];
+            obj->input[in].datatype = get_vx_tensor_datatype(ioBufDesc->inElementType[id]);
         }
     }
 
@@ -838,7 +838,7 @@ static vx_status tiovx_tidl_module_create_inputs(vx_context context, TIOVXTIDLMo
         }
         else
         {
-            TIOVX_MODULE_ERROR("[TIDL-MODULE] Unable to create input tensor template");
+            TIOVX_MODULE_ERROR("[TIDL-MODULE] Unable to create input tensor template \n");
             break;
         }
     }

@@ -85,7 +85,7 @@ extern "C" {
  */
 #define TIOVX_MODULE_TIDL_MAX_TENSORS (8)
 
-#define COMPUTE_CHECKSUM
+// #define COMPUTE_CHECKSUM
 
 typedef struct {
   /*! TIDL node object */
@@ -123,10 +123,10 @@ typedef struct {
   vx_int32 graph_parameter_index;
 
   /*! Config structure file path */
-  vx_char config_file_path[TIOVX_MODULES_MAX_FILE_PATH_SIZE];
+  vx_char* config_file_path;
 
   /*! Network structure file path */
-  vx_char network_file_path[TIOVX_MODULES_MAX_FILE_PATH_SIZE];
+  vx_char* network_file_path;
 
   /*! Name of TIDL module */
   vx_char objName[TIOVX_MODULES_MAX_OBJ_NAME_SIZE];
