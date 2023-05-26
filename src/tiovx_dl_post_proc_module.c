@@ -442,10 +442,6 @@ vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModule
     {
         vxSetNodeTarget(obj->node, VX_TARGET_STRING, target_string);
 
-        vx_bool replicate[] = { vx_false_e, vx_true_e, vx_true_e, vx_true_e };
-
-        vxReplicateNode(graph, obj->node, replicate, 4);
-
         if(obj->en_out_image_write == 1)
         {
             if(output_image != NULL)
