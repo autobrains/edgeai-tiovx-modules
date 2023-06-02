@@ -73,9 +73,15 @@ typedef struct {
     vx_user_data_object config;
     tivxDLPostProcParams params;
 
+    /*! Post Proc kernel object */
+    vx_kernel  kernel;
+
     ImgObj input_image;
-    TensorObj input_tensor;
+    TensorObj input_tensor[TIOVX_MODULES_MAX_TENSORS];
     ImgObj output_image;
+
+    /* This tells the actual size of input_tensor array */
+    vx_uint32 num_input_tensors;
 
     /* Input parameters */
     vx_int32 num_channels;
@@ -94,7 +100,7 @@ typedef struct {
 vx_status tiovx_dl_post_proc_module_init(vx_context context, TIOVXDLPostProcModuleObj *obj);
 vx_status tiovx_dl_post_proc_module_deinit(TIOVXDLPostProcModuleObj *obj);
 vx_status tiovx_dl_post_proc_module_delete(TIOVXDLPostProcModuleObj *obj);
-vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModuleObj *obj, vx_object_array input_image_arr, vx_object_array input_tensor_arr, const char* target_string);
+vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModuleObj *obj, vx_object_array input_image_arr, TensorObj input_tensor_arr[], const char* target_string);
 vx_status tiovx_dl_post_proc_module_release_buffers(TIOVXDLPostProcModuleObj *obj);
 
 vx_status tiovx_dl_post_proc_module_add_write_output_node(vx_graph graph, TIOVXDLPostProcModuleObj *obj);

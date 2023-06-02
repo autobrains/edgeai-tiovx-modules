@@ -83,7 +83,7 @@ static vx_status tiovx_dl_post_proc_module_create_config(vx_context context, TIO
         vxUnmapUserDataObject(obj->config, map_id);
     }
 
-        return status;
+    return status;
 }
 
 static vx_status tiovx_dl_post_proc_module_create_input(vx_context context, TIOVXDLPostProcModuleObj *obj)
@@ -93,9 +93,10 @@ static vx_status tiovx_dl_post_proc_module_create_input(vx_context context, TIOV
     vx_image in_img;
     vx_int32 buf;
 
-    vx_size tensor_sizes[VX_TENSOR_NUMBER_OF_DIMS];
-    vx_tensor in_tensor;
-    vx_int32 dim;
+    vx_size tensor_sizes[TIOVX_MODULES_MAX_TENSOR_DIMS];
+    vx_tensor in_tensor[TIOVX_MODULES_MAX_TENSORS];
+    vx_uint32 in;
+    // vx_int32 dim;
 
     /* Creating image input */
     if(obj->input_image.bufq_depth > TIOVX_MODULES_MAX_BUFQ_DEPTH)
@@ -136,45 +137,53 @@ static vx_status tiovx_dl_post_proc_module_create_input(vx_context context, TIOV
     }
 
     /* Creating tensor input */
-    if(obj->input_tensor.bufq_depth > TIOVX_MODULES_MAX_BUFQ_DEPTH)
+    for(in=0; in < obj->num_input_tensors ; in++)
     {
-        TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Input tensor buffer queue depth %d greater than max supported %d!\n", obj->input_tensor.bufq_depth, TIOVX_MODULES_MAX_BUFQ_DEPTH);
-        return VX_FAILURE;
-    }
-
-    for(buf = 0; buf < TIOVX_MODULES_MAX_BUFQ_DEPTH; buf++)
-    {
-        obj->input_tensor.arr[buf]  = NULL;
-        obj->input_tensor.tensor_handle[buf]  = NULL;
-    }
-
-    for(dim = 0; dim < obj->input_tensor.num_dims; dim++)
-    {
-        tensor_sizes[dim] = obj->input_tensor.dim_sizes[dim];
-    }
-
-    in_tensor  = vxCreateTensor(context, obj->input_tensor.num_dims, tensor_sizes, obj->input_tensor.datatype, 0);
-    status = vxGetStatus((vx_reference)in_tensor);
-
-    if(status == VX_SUCCESS)
-    {
-        for(buf = 0; buf < obj->input_tensor.bufq_depth; buf++)
+        if(obj->input_tensor[in].bufq_depth > TIOVX_MODULES_MAX_BUFQ_DEPTH)
         {
-            obj->input_tensor.arr[buf]  = vxCreateObjectArray(context, (vx_reference)in_tensor, obj->num_channels);
-
-            status = vxGetStatus((vx_reference)obj->input_tensor.arr[buf]);
-            if(status != VX_SUCCESS)
-            {
-                TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Unable to create input array! \n");
-            }
-
-            obj->input_tensor.tensor_handle[buf] = (vx_tensor)vxGetObjectArrayItem((vx_object_array)obj->input_tensor.arr[buf], 0);
+            TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Input tensor buffer queue depth %d greater than max supported %d!\n", obj->input_tensor[in].bufq_depth, TIOVX_MODULES_MAX_BUFQ_DEPTH);
+            return VX_FAILURE;
         }
-        vxReleaseTensor(&in_tensor);
     }
-    else
+
+    for(in=0; in < obj->num_input_tensors ; in++)
     {
-        TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Unable to create input tensor template! \n");
+        for(buf = 0; buf < TIOVX_MODULES_MAX_BUFQ_DEPTH; buf++)
+        {
+            obj->input_tensor[in].arr[buf]  = NULL;
+            obj->input_tensor[in].tensor_handle[buf]  = NULL;
+        }
+    }
+
+    for(in=0; in < obj->num_input_tensors ; in++)
+    {
+        tensor_sizes[0] = obj->input_tensor[in].dim_sizes[0];
+        tensor_sizes[1] = obj->input_tensor[in].dim_sizes[1];
+        tensor_sizes[2] = obj->input_tensor[in].dim_sizes[2];
+
+        in_tensor[in]  = vxCreateTensor(context, obj->input_tensor[in].num_dims, tensor_sizes, obj->input_tensor[in].datatype, 0);
+        status = vxGetStatus((vx_reference)in_tensor[in]);
+
+        if(status == VX_SUCCESS)
+        {
+            for(buf = 0; buf < obj->input_tensor[in].bufq_depth; buf++)
+            {
+                obj->input_tensor[in].arr[buf]  = vxCreateObjectArray(context, (vx_reference)in_tensor[in], obj->num_channels);
+                status = vxGetStatus((vx_reference)obj->input_tensor[in].arr[buf]);
+                
+                if(status != VX_SUCCESS)
+                {
+                    TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Unable to create input array! \n");
+                }
+
+                obj->input_tensor[in].tensor_handle[buf] = (vx_tensor)vxGetObjectArrayItem((vx_object_array)obj->input_tensor[in].arr[buf], 0);
+            }
+            vxReleaseTensor(&in_tensor[in]);
+        }
+        else
+        {
+            TIOVX_MODULE_ERROR("[DL-POST-PROC-MODULE] Unable to create input tensor template! \n");
+        }
     }
 
     return status;
@@ -276,6 +285,8 @@ vx_status tiovx_dl_post_proc_module_init(vx_context context, TIOVXDLPostProcModu
 {
     vx_status status = VX_SUCCESS;
 
+    obj->kernel = NULL;
+
     status = tiovx_dl_post_proc_module_create_config(context, obj);
 
     if((vx_status)VX_SUCCESS == status)
@@ -288,6 +299,12 @@ vx_status tiovx_dl_post_proc_module_init(vx_context context, TIOVXDLPostProcModu
         status = tiovx_dl_post_proc_module_create_output(context, obj);
     }
 
+    if(status == VX_SUCCESS)
+    {
+        obj->kernel = tivxAddKernelDLPostProc(context, obj->num_input_tensors);
+        status = vxGetStatus((vx_reference)obj->kernel);
+    }
+
     return status;
 }
 
@@ -296,6 +313,7 @@ vx_status tiovx_dl_post_proc_module_deinit(TIOVXDLPostProcModuleObj *obj)
     vx_status status = VX_SUCCESS;
 
     vx_int32 buf;
+    vx_uint32 in;
 
     TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Releasing config handle!\n");
     status = vxReleaseUserDataObject(&obj->config);
@@ -314,17 +332,20 @@ vx_status tiovx_dl_post_proc_module_deinit(TIOVXDLPostProcModuleObj *obj)
         }
     }
 
-    for(buf = 0; buf < obj->input_tensor.bufq_depth; buf++)
+    for(in = 0; in < obj->num_input_tensors; in++)
     {
-        if((vx_status)VX_SUCCESS == status)
+        for(buf = 0; buf < obj->input_tensor[in].bufq_depth; buf++)
         {
-            TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Releasing input tensor handle!\n");
-            status = vxReleaseTensor(&obj->input_tensor.tensor_handle[buf]);
-        }
-        if((vx_status)VX_SUCCESS == status)
-        {
-            TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Releasing input tensor arr!\n");
-            status = vxReleaseObjectArray(&obj->input_tensor.arr[buf]);
+            if((vx_status)VX_SUCCESS == status)
+            {
+                TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Releasing input tensor handle!\n");
+                status = vxReleaseTensor(&obj->input_tensor[in].tensor_handle[buf]);
+            }
+            if((vx_status)VX_SUCCESS == status)
+            {
+                TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Releasing input tensor arr!\n");
+                status = vxReleaseObjectArray(&obj->input_tensor[in].arr[buf]);
+            }
         }
     }
 
@@ -382,17 +403,24 @@ vx_status tiovx_dl_post_proc_module_delete(TIOVXDLPostProcModuleObj *obj)
             status = vxReleaseNode(&obj->write_node);
         }
     }
+    if(obj->kernel != NULL)
+    {
+        if(status == VX_SUCCESS)
+            vxRemoveKernel(obj->kernel);
+    }
 
     return status;
 }
 
-vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModuleObj *obj, vx_object_array input_image_arr, vx_object_array input_tensor_arr, const char* target_string)
+vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModuleObj *obj, vx_object_array input_image_arr, TensorObj input_tensor_arr[], const char* target_string)
 {
     vx_status status = VX_SUCCESS;
 
     vx_image input_image;
-    vx_tensor input_tensor;
+    vx_tensor input_tensor[TIOVX_MODULES_MAX_TENSORS];
     vx_image output_image;
+
+    vx_uint32 in;
 
     if(input_image_arr != NULL)
     {
@@ -412,17 +440,23 @@ vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModule
 
     if(input_tensor_arr != NULL)
     {
-        input_tensor = (vx_tensor)vxGetObjectArrayItem((vx_object_array)input_tensor_arr, 0);
+        for(in = 0; in < obj->num_input_tensors; in++)
+        {
+            input_tensor[in] = (vx_tensor)vxGetObjectArrayItem((vx_object_array)input_tensor_arr[in].arr[0], 0);
+        }
     }
     else
     {
-        if(obj->input_tensor.arr[0] != NULL)
+        for(in = 0; in < obj->num_input_tensors; in++)
         {
-            input_tensor = (vx_tensor)vxGetObjectArrayItem((vx_object_array)obj->input_tensor.arr[0], 0);
-        }
-        else
-        {
-            input_tensor = NULL;
+            if(obj->input_tensor[in].arr[0] != NULL)
+            {
+                input_tensor[in] = (vx_tensor)vxGetObjectArrayItem((vx_object_array)obj->input_tensor[in].arr[0], 0);
+            }
+            else
+            {
+                input_tensor[in] = NULL;
+            }
         }
     }
 
@@ -435,7 +469,8 @@ vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModule
         output_image = NULL;
     }
 
-    obj->node = tivxDLPostProcNode(graph, obj->config, input_image, input_tensor, output_image);
+    /* Modify post proc kernel to take care of array of input tensors */
+    obj->node = tivxDLPostProcNode(graph, obj->kernel, obj->config, input_image, input_tensor, output_image);
     status = vxGetStatus((vx_reference)obj->node);
 
     if((vx_status)VX_SUCCESS == status)
@@ -462,8 +497,11 @@ vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModule
     if(input_image != NULL)
         vxReleaseImage(&input_image);
 
-    if(input_tensor != NULL)
-        vxReleaseTensor(&input_tensor);
+    for(in = 0; in < obj->num_input_tensors; in++)
+    {    
+        if(input_tensor[in] != NULL)
+        vxReleaseTensor(&input_tensor[in]);
+    }
 
     if(output_image != NULL)
         vxReleaseImage(&output_image);
@@ -477,7 +515,7 @@ vx_status tiovx_dl_post_proc_module_release_buffers(TIOVXDLPostProcModuleObj *ob
 
     void        *virtAddr[TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
     vx_uint32   size[TIOVX_MODULES_MAX_REF_HANDLES];
-    vx_uint32   numEntries;
+    vx_uint32   numEntries, in;
     vx_int32    bufq, ch;
 
     /* Free input image handles */
@@ -533,53 +571,56 @@ vx_status tiovx_dl_post_proc_module_release_buffers(TIOVXDLPostProcModuleObj *ob
     }
 
     /* Free input tensor handles */
-    for(bufq = 0; bufq < obj->input_tensor.bufq_depth; bufq++)
+    for(in = 0; in < obj->num_input_tensors; in++)
     {
-        for(ch = 0; ch < obj->num_channels; ch++)
+        for(bufq = 0; bufq < obj->input_tensor[in].bufq_depth; bufq++)
         {
-            vx_reference ref = vxGetObjectArrayItem(obj->input_tensor.arr[bufq], ch);
-            status = vxGetStatus((vx_reference)ref);
-
-            if((vx_status)VX_SUCCESS == status)
+            for(ch = 0; ch < obj->num_channels; ch++)
             {
-                /* Export handles to get valid size information. */
-                status = tivxReferenceExportHandle(ref,
-                                                    virtAddr,
-                                                    size,
-                                                    TIOVX_MODULES_MAX_REF_HANDLES,
-                                                    &numEntries);
+                vx_reference ref = vxGetObjectArrayItem(obj->input_tensor[in].arr[bufq], ch);
+                status = vxGetStatus((vx_reference)ref);
 
                 if((vx_status)VX_SUCCESS == status)
                 {
-                    vx_int32 ctr;
-                    /* Currently the vx_image buffers are alloated in one shot for multiple planes.
-                        So if we are freeing this buffer then we need to get only the first plane
-                        pointer address but add up the all the sizes to free the entire buffer */
-                    vx_uint32 freeSize = 0;
-                    for(ctr = 0; ctr < numEntries; ctr++)
-                    {
-                        freeSize += size[ctr];
-                    }
+                    /* Export handles to get valid size information. */
+                    status = tivxReferenceExportHandle(ref,
+                                                        virtAddr,
+                                                        size,
+                                                        TIOVX_MODULES_MAX_REF_HANDLES,
+                                                        &numEntries);
 
-                    if(virtAddr[0] != NULL)
+                    if((vx_status)VX_SUCCESS == status)
                     {
-                        TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Freeing output, bufq=%d, ch=%d, addr = 0x%016lX, size = %d \n", bufq, ch, (vx_uint64)virtAddr[0], freeSize);
-                        tivxMemFree(virtAddr[0], freeSize, TIVX_MEM_EXTERNAL);
-                    }
+                        vx_int32 ctr;
+                        /* Currently the vx_image buffers are alloated in one shot for multiple planes.
+                            So if we are freeing this buffer then we need to get only the first plane
+                            pointer address but add up the all the sizes to free the entire buffer */
+                        vx_uint32 freeSize = 0;
+                        for(ctr = 0; ctr < numEntries; ctr++)
+                        {
+                            freeSize += size[ctr];
+                        }
 
-                    for(ctr = 0; ctr < numEntries; ctr++)
-                    {
-                        virtAddr[ctr] = NULL;
-                    }
+                        if(virtAddr[0] != NULL)
+                        {
+                            TIOVX_MODULE_PRINTF("[DL-POST-PROC-MODULE] Freeing output, bufq=%d, ch=%d, addr = 0x%016lX, size = %d \n", bufq, ch, (vx_uint64)virtAddr[0], freeSize);
+                            tivxMemFree(virtAddr[0], freeSize, TIVX_MEM_EXTERNAL);
+                        }
 
-                    /* Assign NULL handles to the OpenVx objects as it will avoid
-                        doing a tivxMemFree twice, once now and once during release */
-                    status = tivxReferenceImportHandle(ref,
-                                                    (const void **)virtAddr,
-                                                    (const uint32_t *)size,
-                                                    numEntries);
+                        for(ctr = 0; ctr < numEntries; ctr++)
+                        {
+                            virtAddr[ctr] = NULL;
+                        }
+
+                        /* Assign NULL handles to the OpenVx objects as it will avoid
+                            doing a tivxMemFree twice, once now and once during release */
+                        status = tivxReferenceImportHandle(ref,
+                                                        (const void **)virtAddr,
+                                                        (const uint32_t *)size,
+                                                        numEntries);
+                    }
+                    vxReleaseReference(&ref);
                 }
-                vxReleaseReference(&ref);
             }
         }
     }

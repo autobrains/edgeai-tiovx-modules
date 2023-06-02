@@ -80,11 +80,6 @@
 extern "C" {
 #endif
 
-/** \brief Maximum number of TIDL tensors
- *
- */
-#define TIOVX_MODULE_TIDL_MAX_TENSORS (8)
-
 // #define COMPUTE_CHECKSUM
 
 typedef struct {
@@ -138,10 +133,10 @@ typedef struct {
   vx_uint8 network_checksum[TIVX_TIDL_J7_CHECKSUM_SIZE];
 
   /*! TIDL input tensor Object  */
-  TensorObj input[TIOVX_MODULE_TIDL_MAX_TENSORS];
+  TensorObj input[TIOVX_MODULES_MAX_TENSORS];
   
   /*! TIDL output tensor Object  */
-  TensorObj output[TIOVX_MODULE_TIDL_MAX_TENSORS];
+  TensorObj output[TIOVX_MODULES_MAX_TENSORS];
 
   vx_int32 num_cameras;
 

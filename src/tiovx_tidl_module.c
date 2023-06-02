@@ -225,7 +225,7 @@ vx_status tiovx_tidl_module_create(vx_context context, vx_graph graph, TIOVXTIDL
 {
     vx_status status = VX_SUCCESS;
     vx_reference params[TIOVX_MODULES_MAX_PARAMS];
-    vx_object_array input_arr[TIOVX_MODULE_TIDL_MAX_TENSORS];
+    vx_object_array input_arr[TIOVX_MODULES_MAX_TENSORS];
     vx_tensor input_tensor[TIOVX_MODULES_MAX_TENSORS];
     vx_tensor output_tensor[TIOVX_MODULES_MAX_TENSORS];
     vx_int32 i;
@@ -840,23 +840,12 @@ static vx_status tiovx_tidl_module_create_outputs(vx_context context, TIOVXTIDLM
                       (void **)&tidlParams, VX_READ_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
     ioBufDesc = (sTIDL_IOBufDesc_t *)&tidlParams->ioBufDesc;
-    for(id = 0; id < ioBufDesc->numOutputBuf; id++) {
-        vx_char name[VX_MAX_REFERENCE_NAME];
-
-        snprintf(name, VX_MAX_REFERENCE_NAME, "tidl_node_output_tensors_%d", id);
-
-        tensor_sizes[0] = ioBufDesc->outWidth[id]  + ioBufDesc->outPadL[id] + ioBufDesc->outPadR[id];
-        tensor_sizes[1] = ioBufDesc->outHeight[id] + ioBufDesc->outPadT[id] + ioBufDesc->outPadB[id];
-        tensor_sizes[2] = ioBufDesc->outNumChannels[id];
-
-        for(in = 0; in < obj->num_output_tensors; in++)
-        {
-            obj->output[in].num_dims = 3;
-            obj->output[in].dim_sizes[0] = tensor_sizes[0];
-            obj->output[in].dim_sizes[1] = tensor_sizes[1];
-            obj->output[in].dim_sizes[2] = tensor_sizes[2];
-            obj->output[in].datatype = get_vx_tensor_datatype(ioBufDesc->outElementType[id]);
-        }
+    for(id = 0; id < obj->num_output_tensors; id++) {
+        obj->output[id].num_dims = 3;
+        obj->output[id].dim_sizes[0] = ioBufDesc->outWidth[id]  + ioBufDesc->outPadL[id] + ioBufDesc->outPadR[id];
+        obj->output[id].dim_sizes[1] = ioBufDesc->outHeight[id] + ioBufDesc->outPadT[id] + ioBufDesc->outPadB[id];
+        obj->output[id].dim_sizes[2] = ioBufDesc->outNumChannels[id];
+        obj->output[id].datatype = get_vx_tensor_datatype(ioBufDesc->outElementType[id]);
     }
 
     vxUnmapUserDataObject(obj->config, map_id_config);
@@ -872,6 +861,10 @@ static vx_status tiovx_tidl_module_create_outputs(vx_context context, TIOVXTIDLM
 
     for(in = 0; in < obj->num_output_tensors; in++)
     {
+        tensor_sizes[0] = obj->output[in].dim_sizes[0];
+        tensor_sizes[1] = obj->output[in].dim_sizes[1];
+        tensor_sizes[2] = obj->output[in].dim_sizes[2];
+
         vx_tensor tensor = vxCreateTensor(context, obj->output[in].num_dims, tensor_sizes, obj->output[in].datatype, 0);
         status = vxGetStatus((vx_reference)tensor);
 
