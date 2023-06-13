@@ -285,6 +285,26 @@ vx_status tiovx_tidl_module_create(vx_context context, vx_graph graph, TIOVXTIDL
     vxSetReferenceName((vx_reference)tidlObj->node, "tidl_node");
     vxSetNodeTarget(tidlObj->node, VX_TARGET_STRING, TIVX_TARGET_DSP_C7_1);
 
+    vx_bool replicate[16];
+    replicate[TIVX_KERNEL_TIDL_IN_CONFIG_IDX] = vx_false_e;
+    replicate[TIVX_KERNEL_TIDL_IN_NETWORK_IDX] = vx_false_e;
+    replicate[TIVX_KERNEL_TIDL_IN_CREATE_PARAMS_IDX] = vx_false_e;
+    replicate[TIVX_KERNEL_TIDL_IN_IN_ARGS_IDX] = vx_true_e;
+    replicate[TIVX_KERNEL_TIDL_IN_OUT_ARGS_IDX] = vx_true_e;
+    replicate[TIVX_KERNEL_TIDL_IN_TRACE_DATA_IDX] = vx_false_e;
+
+    for(i = 0; i < tidlObj->num_input_tensors; i++)
+    {
+        replicate[TIVX_KERNEL_TIDL_NUM_BASE_PARAMETERS + i] = vx_true_e;
+    }
+
+    for(i = 0; i < tidlObj->num_output_tensors; i++)
+    {
+        replicate[TIVX_KERNEL_TIDL_NUM_BASE_PARAMETERS + tidlObj->num_input_tensors + i] = vx_true_e;
+    }
+
+    vxReplicateNode(graph, tidlObj->node, replicate, TIVX_KERNEL_TIDL_NUM_BASE_PARAMETERS + tidlObj->num_input_tensors + tidlObj->num_output_tensors);
+
     if((vx_status)VX_SUCCESS == status)
     {
         if(tidlObj->en_out_tensor_write == 1)

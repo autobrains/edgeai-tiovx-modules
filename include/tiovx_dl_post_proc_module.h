@@ -62,7 +62,8 @@
 #ifndef _TIOVX_DL_POST_PROC_MODULE
 #define _TIOVX_DL_POST_PROC_MODULE
 
-#include "tiovx_modules_common.h"
+#include <tiovx_modules_common.h>
+#include <tivx_dl_post_proc_host.h>
 
 #ifdef __cplusplus
 extern "C" {

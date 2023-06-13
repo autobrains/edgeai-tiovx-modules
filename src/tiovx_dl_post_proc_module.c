@@ -59,7 +59,7 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#include "tiovx_dl_post_proc_module.h"
+#include <tiovx_dl_post_proc_module.h>
 
 static vx_status tiovx_dl_post_proc_module_create_config(vx_context context, TIOVXDLPostProcModuleObj *obj)
 {
@@ -476,6 +476,18 @@ vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModule
     if((vx_status)VX_SUCCESS == status)
     {
         vxSetNodeTarget(obj->node, VX_TARGET_STRING, target_string);
+
+        vx_bool replicate[8];
+        replicate[TIVX_DL_POST_PROC_CONFIG_IDX] = vx_false_e;
+        replicate[TIVX_DL_POST_PROC_INPUT_IMAGE_IDX] = vx_true_e;
+        replicate[TIVX_DL_POST_PROC_OUTPUT_IMAGE_IDX] = vx_true_e;
+
+        for(in = 0; in < obj->num_input_tensors; in++)
+        {
+            replicate[TIVX_DL_POST_PROC_INPUT_TENSOR_START_IDX + in] = vx_true_e;
+        }
+
+        vxReplicateNode(graph, obj->node, replicate, TIVX_DL_POST_PROC_BASE_PARAMS + obj->num_input_tensors);
 
         if(obj->en_out_image_write == 1)
         {
