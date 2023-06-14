@@ -277,7 +277,7 @@ static vx_status app_run_graph(AppObj *obj)
     char input_filename[100];
     char output_filename[100];
 
-    sprintf(input_filename, "%s/raw_images/avp3_1280x720_1_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(input_filename, "%s/raw_images/modules_test/avp3_1280x720_1_nv12.yuv", EDGEAI_DATA_PATH);
     sprintf(output_filename, "%s/output/avp3_1280x720_1_output_mosaic_edgeai_modules_nv12.yuv", EDGEAI_DATA_PATH);
 
     TIOVXImgMosaicModuleObj *imgMosaicObj = &obj->imgMosaicObj;

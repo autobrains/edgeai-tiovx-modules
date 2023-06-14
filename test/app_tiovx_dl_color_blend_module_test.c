@@ -276,7 +276,7 @@ static vx_status app_run_graph(AppObj *obj)
     char input_tensor_filename[100];
     char output_image_filename[100];
 
-    sprintf(input_image_filename, "%s/raw_images/baboon_640x480_rgb.bmp", EDGEAI_DATA_PATH);
+    sprintf(input_image_filename, "%s/raw_images/modules_test/baboon_640x480_rgb.bmp", EDGEAI_DATA_PATH);
     sprintf(input_tensor_filename, "%s/output/baboon_mask", EDGEAI_DATA_PATH);
     sprintf(output_image_filename, "%s/output/baboon_out_640x480_rgb.bmp", EDGEAI_DATA_PATH);
 

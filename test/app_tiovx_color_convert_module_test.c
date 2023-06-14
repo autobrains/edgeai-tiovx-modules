@@ -237,7 +237,7 @@ static vx_status app_run_graph(AppObj *obj)
     char input_filename[100];
     char output_filename[100];
 
-    sprintf(input_filename, "%s/raw_images/baboon_640x480_rgb.bmp", EDGEAI_DATA_PATH);
+    sprintf(input_filename, "%s/raw_images/modules_test/baboon_640x480_rgb.bmp", EDGEAI_DATA_PATH);
     sprintf(output_filename, "%s/output/baboon_640x480_i420.yuv", EDGEAI_DATA_PATH);
 
     vx_image input_o, output_o;

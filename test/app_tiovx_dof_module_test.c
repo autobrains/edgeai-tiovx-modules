@@ -292,8 +292,8 @@ static vx_status app_run_graph(AppObj *obj)
     char input_ref_filename_template[100];
     char output_filename[100];
 
-    sprintf(input_filename_template, "%s/raw_images/avp3_1280x720_0_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
-    sprintf(input_ref_filename_template, "%s/raw_images/avp3_1280x720_1_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
+    sprintf(input_filename_template, "%s/raw_images/modules_test/avp3_1280x720_0_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
+    sprintf(input_ref_filename_template, "%s/raw_images/modules_test/avp3_1280x720_1_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
     sprintf(output_filename, "%s/output/output_dof_u32.raw", EDGEAI_DATA_PATH);
 
     vx_pyramid  input_o, input_ref_o;

@@ -245,7 +245,7 @@ static vx_status app_run_graph(AppObj *obj)
     char input_filename[100];
     char output_filename[100];
 
-    sprintf(input_filename, "%s/raw_images/avp3_1280x720_flow_vector_u32.raw", EDGEAI_DATA_PATH);
+    sprintf(input_filename, "%s/raw_images/modules_test/avp3_1280x720_flow_vector_u32.raw", EDGEAI_DATA_PATH);
     sprintf(output_filename, "%s/output/output_dof_viz_rgb.raw", EDGEAI_DATA_PATH);
 
     vx_image  input_o;
