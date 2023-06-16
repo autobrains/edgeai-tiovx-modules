@@ -95,6 +95,7 @@ include_directories(${PROJECT_SOURCE_DIR}
                     ${TARGET_FS}/usr/include/processor_sdk/vision_apps/kernels/stereo/include
                     ${TARGET_FS}/usr/include/edgeai-tiovx-kernels
                     ${TARGET_FS}/usr/include/processor_sdk/app_utils/
+                    ${TARGET_FS}/usr/include/processor_sdk/video_io/kernels/include/
                    )
 
 set(SYSTEM_LINK_LIBS
