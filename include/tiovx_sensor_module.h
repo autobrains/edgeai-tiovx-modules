@@ -72,7 +72,7 @@
  * @{
  */
 
-#include "tiovx_modules_common.h"
+#include <tiovx_modules_common.h>
 #include <utils/iss/include/app_iss.h>
 
 #ifdef __cplusplus
@@ -82,17 +82,17 @@ extern "C" {
 /** \brief Use case config value corresponding to ISS_SENSOR_FEATURE_CFG_UC0
  *
  */
-#define APP_SENSOR_FEATURE_CFG_UC0 (0)
+#define TIOVX_SENSOR_MODULE_FEATURE_CFG_UC0 (0)
 
 /** \brief Use case config value corresponding to ISS_SENSOR_FEATURE_CFG_UC1
  *
  */
-#define APP_SENSOR_FEATURE_CFG_UC1 (1)
+#define TIOVX_SENSOR_MODULE_FEATURE_CFG_UC1 (1)
 
 /** \brief Use case config value corresponding to ISS_SENSOR_FEATURE_CFG_UC2
  *
  */
-#define APP_SENSOR_FEATURE_CFG_UC2 (2)
+#define TIOVX_SENSOR_MODULE_FEATURE_CFG_UC2 (2)
 
 /** \brief Sensor Module Data Structure
  *
@@ -106,13 +106,19 @@ typedef struct {
     /*! DCC configuration data structure */
     vx_user_data_object dcc_config;
 
+    /*! Array of strings of available sensor names */
+    char availableSensorNames[ISS_SENSORS_MAX_SUPPORTED_SENSOR][ISS_SENSORS_MAX_NAME];
+
     /*! String of sensor name being used, Below are the supported sensors
-     *
-     * SENSOR_SONY_IMX390_UB953_D3
-     * SENSOR_ONSEMI_AR0820_UB953_LI
-     * SENSOR_ONSEMI_AR0233_UB953_MARS
-     * SENSOR_SONY_IMX219_RPI
-     * SENSOR_OV2312_UB953_LI
+     * 
+     * The below macros are defined in iss_sensors.h
+     * SENSOR_SONY_IMX390_UB953_D3              "IMX390-UB953_D3"
+     * SENSOR_ONSEMI_AR0233_UB953_MARS          "AR0233-UB953_MARS"
+     * SENSOR_ONSEMI_AR0820_UB953_LI            "AR0820-UB953_LI"
+     * UB9XX_RAW_TESTPAT                        "UB9xxx_RAW12_TESTPATTERN"
+     * UB96X_TESTPATTERN_UYVY                   "UB96x_UYVY_TESTPATTERN"
+     * GW_AR0233_UYVY                           "GW_AR0233_UYVY"
+     * SENSOR_OV2312_UB953_LI                   "OV2312-UB953_LI"
      *
      * */
     vx_char sensor_name[ISS_SENSORS_MAX_NAME];
@@ -174,18 +180,18 @@ typedef struct {
  * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
  *
  */
-vx_status tiovx_querry_sensor(SensorObj *sensorObj);
+vx_status tiovx_sensor_module_query(SensorObj *sensorObj);
 
 /** \brief Sensor module init sensor helper function
  *
  * This Sensor module init function initializes the sensor after the sensor has been queried and set using
- * the tiovx_querry_sensor
+ * the tiovx_sensor_module_query
  *
  * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
  * \param [in]     objName      String of the name of this object
  *
  */
-vx_status tiovx_init_sensor(SensorObj *sensorObj, char *objName);
+vx_status tiovx_sensor_module_init(SensorObj *sensorObj, char *objName);
 
 /** \brief Sensor module deinit sensor helper function
  *
@@ -194,6 +200,25 @@ vx_status tiovx_init_sensor(SensorObj *sensorObj, char *objName);
  * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
  *
  */
+void tiovx_sensor_module_deinit(SensorObj *sensorObj);
+
+
+/** THESE BELOW APIS ARE BEING USED BY EDGEAI_GST_PLUGINS
+ *  These plugins are used by optiflow and edgeai-gst-apps
+ */
+
+vx_status tiovx_querry_sensor(SensorObj *sensorObj);
+
+/** \brief Sensor module init sensor helper function
+ *
+ * This Sensor module init function populates sensorObj which is used by gst-plugins
+ *
+ * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
+ * \param [in]     objName      String of the name of this object
+ *
+ */
+vx_status tiovx_init_sensor(SensorObj *sensorObj, char *objName);
+
 void tiovx_deinit_sensor(SensorObj *sensorObj);
 
 /* @} */
@@ -202,4 +227,4 @@ void tiovx_deinit_sensor(SensorObj *sensorObj);
 }
 #endif
 
-#endif //__APP_SENSOR_MODULE
+#endif //_TIOVX_SENSOR_MODULE

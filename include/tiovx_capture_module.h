@@ -59,52 +59,74 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- #ifndef _TIOVX_DISPLAY_MODULE
- #define _TIOVX_DISPLAY_MODULE
+ #ifndef _TIOVX_CAPTURE_MODULE
+ #define _TIOVX_CAPTURE_MODULE
 
 #include <tiovx_modules_common.h>
-#include <TI/video_io_display.h>
+#include <TI/video_io_capture.h>
+#include <tiovx_sensor_module.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define DEFAULT_DISPLAY_WIDTH 1920
-#define DEFAULT_DISPLAY_HEIGHT 1080
-
 typedef struct {
-    /*! Display node object */
+    /*! Capture node object */
     vx_node node;
 
-    /*! Display node user data object for configuration of node */
+    /*! Capture node user data object for configuration of node */
     vx_user_data_object config;
-    
-    /*! Display node params structure to initialize params object */
-    tivx_display_params_t params;
 
-    /*! Input image to display */
-    vx_image input;
+    /*! Capture node params structure to initialize config object */
+    tivx_capture_params_t params;
 
-    /*! Width of display node input image */
-    vx_int32 input_width;
+    /*! Capture node object array output */
+    vx_object_array image_arr[TIOVX_MODULES_MAX_BUFQ_DEPTH];
 
-    /*! Height of display node input image */
-    vx_int32 input_height;
+    /*! Bufq depth of output image*/
+    vx_int32 out_bufq_depth;
 
-    /*! Color format of display node input image */
-    vx_int32 input_color_format;
+    /*! Capture node format, taken from sensor_out_format */
+    /*! sensor_out_format : 0=RAW, 1=YUV */
+    vx_uint32 capture_format;
 
-} TIOVXDisplayModuleObj;
+    /*! Capture node graph parameter index */
+    vx_int32 graph_parameter_index;
 
-vx_status tiovx_display_module_init(vx_context context, TIOVXDisplayModuleObj *obj);
-vx_status tiovx_display_module_deinit(TIOVXDisplayModuleObj *obj);
-vx_status tiovx_display_module_delete(TIOVXDisplayModuleObj *obj);
-vx_status tiovx_display_module_create(vx_graph graph, TIOVXDisplayModuleObj *obj, vx_image input_image, const char* target_string);
-vx_status tiovx_display_module_release_buffers(TIOVXDisplayModuleObj *obj);
-void tiovx_display_module_params_init(TIOVXDisplayModuleObj *obj);
+    /*! Name of capture module */
+    vx_char objName[TIOVX_MODULES_MAX_OBJ_NAME_SIZE];
+
+    /*! Raw image used when camera gets disconnected */
+    tivx_raw_image error_frame_raw_image;
+
+    /*! Flag to enable detection of camera disconnection */
+    vx_uint8 enable_error_detection;
+
+    /*! Flag to indicate whether or not the intermediate output is written */
+    vx_int32 en_out_image_write;
+
+    /* These params are needed only for writing intermediate output */
+    vx_array file_path;
+    vx_array file_prefix;
+    vx_node write_node;
+    vx_user_data_object write_cmd;
+
+    vx_char output_file_path[TIVX_FILEIO_FILE_PATH_LENGTH];
+
+} TIOVXCaptureModuleObj;
+
+vx_status tiovx_capture_module_init(vx_context context, TIOVXCaptureModuleObj *obj, SensorObj *sensorObj);
+vx_status tiovx_capture_module_deinit(TIOVXCaptureModuleObj *obj);
+vx_status tiovx_capture_module_delete(TIOVXCaptureModuleObj *obj);
+vx_status tiovx_capture_module_create(vx_graph graph, TIOVXCaptureModuleObj *obj, const char* target_string);
+vx_status tiovx_capture_module_release_buffers(TIOVXCaptureModuleObj *obj);
+
+vx_status tiovx_capture_module_add_write_output_node(vx_graph graph, TIOVXCaptureModuleObj *obj);
+vx_status tiovx_capture_module_send_write_output_cmd(TIOVXCaptureModuleObj *obj, vx_uint32 start_frame, vx_uint32 num_frames, vx_uint32 num_skip);
+void tiovx_capture_module_params_init(TIOVXCaptureModuleObj *captureObj, SensorObj *sensorObj);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _TIOVX_DISPLAY_MODULE
+#endif // _TIOVX_CAPTURE_MODULE
