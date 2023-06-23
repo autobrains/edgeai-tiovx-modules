@@ -70,6 +70,7 @@ static vx_status tiovx_capture_module_create_output(vx_context context, TIOVXCap
 
     IssSensor_CreateParams *sensorParams = &sensorObj->sensorParams;
     vx_int32 buf;
+    TIOVX_MODULE_PRINTF("captureObj->capture_format = %d \n", captureObj->capture_format);
 
     /* RAW format */
     if(0 == captureObj->capture_format)
@@ -340,7 +341,7 @@ static vx_status tiovx_capture_module_create_error_detection_frame(vx_context co
                                                 raw_image_fname,
                                                 &bytes_read);
 
-        TIOVX_MODULE_PRINTF("%d bytes were read by read_error_image_raw() from path %s\n", bytes_read, test_data_paths[sensorObj->sensor_index]);
+        TIOVX_MODULE_PRINTF("%d bytes were read by read_error_image_raw() from path %s\n", bytes_read, test_image_paths[sensorObj->sensor_index]);
         status = vxGetStatus((vx_reference)captureObj->error_frame_raw_image);
 
         if(status == VX_SUCCESS)
@@ -497,6 +498,11 @@ vx_status tiovx_capture_module_deinit(TIOVXCaptureModuleObj *obj)
         }
     }
 
+    if(NULL != obj->error_frame_raw_image)
+    {
+        tivxReleaseRawImage(&obj->error_frame_raw_image);
+    }
+
     if(obj->en_out_image_write == 1)
     {
         if((vx_status)VX_SUCCESS == status)
@@ -528,6 +534,10 @@ vx_status tiovx_capture_module_delete(TIOVXCaptureModuleObj *obj)
     {
         TIOVX_MODULE_PRINTF("[CAPTURE-MODULE] Releasing node reference!\n");
         status = vxReleaseNode(&obj->node);
+    }
+    if(obj->write_node != NULL)
+    {
+        vxReleaseNode(&obj->write_node);
     }
 
     return status;
@@ -711,4 +721,13 @@ vx_status tiovx_capture_module_send_write_output_cmd(TIOVXCaptureModuleObj *obj,
 
 
     return (status);
+}
+
+vx_status tiovx_capture_module_send_error_frame(TIOVXCaptureModuleObj *captureObj)
+{
+    vx_status status = VX_SUCCESS;
+
+    status = tivxCaptureRegisterErrorFrame(captureObj->node, (vx_reference)captureObj->error_frame_raw_image);
+
+    return status;
 }

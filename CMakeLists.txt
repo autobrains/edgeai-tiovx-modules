@@ -19,6 +19,7 @@ set(SRC_FILES
     src/tiovx_tidl_module.c
     src/tiovx_dl_post_proc_module.c
     src/tiovx_capture_module.c
+    src/tiovx_aewb_module.c
     src/tiovx_utils.c)
 
 if ("${TARGET_SOC}" STREQUAL "J721E" OR "${TARGET_SOC}" STREQUAL "J721S2" OR "${TARGET_SOC}" STREQUAL "J784S4")

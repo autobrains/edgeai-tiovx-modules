@@ -115,15 +115,100 @@ typedef struct {
 
 } TIOVXCaptureModuleObj;
 
+/** \brief Capture module init helper function
+ *
+ * This capture init helper function will create all the data objects required to create the capture
+ * node
+ *
+ * \param [in]  context    OpenVX context which must be created using \ref vxCreateContext
+ * \param [out] captureObj Capture Module object which gets populated with capture node data objects
+ * \param [in]  sensorObj  Sensor Module object used to initialize capture data object parameters;
+ *                         must be initialized prior to passing to this function
+ *
+ */
 vx_status tiovx_capture_module_init(vx_context context, TIOVXCaptureModuleObj *obj, SensorObj *sensorObj);
+
+/** \brief Capture module deinit helper function
+ *
+ * This capture deinit helper function will release all the data objects created during the \ref tiovx_capture_module_init call
+ *
+ * \param [in,out] captureObj    Capture Module object which contains capture node data objects which are released in this function
+ * 
+ */
 vx_status tiovx_capture_module_deinit(TIOVXCaptureModuleObj *obj);
+
+/** \brief Capture module delete helper function
+ *
+ * This capture delete helper function will delete the capture node and write node that is created during the \ref tiovx_capture_module_create call
+ *
+ * \param [in,out] captureObj   Capture Module object which contains capture node objects which are released in this function
+ *
+ */
 vx_status tiovx_capture_module_delete(TIOVXCaptureModuleObj *obj);
+
+/** \brief Capture module create helper function
+ *
+ * This capture create helper function will create the node using all the data objects created during the \ref tiovx_capture_module_init call.
+ * Internally calls \ref tiovx_capture_module_add_write_output_node if en_out_image_write is set
+ *
+ * \param [in]     graph       OpenVX graph that has been created using \ref vxCreateGraph and where the capture node is created
+ * \param [in,out] captureObj  Capture Module object which contains capture node and write node which are created in this function
+ *
+ */
 vx_status tiovx_capture_module_create(vx_graph graph, TIOVXCaptureModuleObj *obj, const char* target_string);
+
+/** \brief Capture module release buffers helper function
+ *
+ * This Capture helper function will release the buffers alloted during vxVerifyGraph stage
+ *
+ * \param [in] obj  Capture Module object
+ *
+ */
 vx_status tiovx_capture_module_release_buffers(TIOVXCaptureModuleObj *obj);
 
+/** \brief Capture module write output helper function
+ *
+ * This capture create helper function will create the node for writing the capture output
+ *
+ * \param [in]     graph       OpenVX graph
+ * \param [in,out] captureObj  Capture Module object which contains capture node and write node which are created in this function
+ *
+ */
 vx_status tiovx_capture_module_add_write_output_node(vx_graph graph, TIOVXCaptureModuleObj *obj);
+
+/** \brief Capture module write output helper function
+ *
+ * This capture create helper function will create the node for writing the capture output
+ *
+ * \param [in] captureObj    Capture Module object which contains the write node used in this function
+ * \param [in] start_frame   Starting frame to write
+ * \param [in] num_frames    Total number of frames to write
+ * \param [in] num_skip      Number of capture frames to skip writing
+ *
+ */
 vx_status tiovx_capture_module_send_write_output_cmd(TIOVXCaptureModuleObj *obj, vx_uint32 start_frame, vx_uint32 num_frames, vx_uint32 num_skip);
+
+/** \brief Capture module module params initialization
+ *
+ * This capture create helper function will initialize some parameters of capture node by using details
+ * from sensorObj
+ *
+ * \param [in] captureObj    Capture Module object which contains the write node used in this function
+ * \param [in] sensorObj     Sensor Module object used to initialize capture data object parameters;
+ *                           must be initialized prior to passing to this function
+ * 
+ */
 void tiovx_capture_module_params_init(TIOVXCaptureModuleObj *captureObj, SensorObj *sensorObj);
+
+/** \brief Capture module send error frmae
+ *
+ * This capture helper function send the blank frame to the capture node over a control command.  This frame is
+ * used as the output for when a camera is disconnected
+ *
+ * \param [in] captureObj   Capture Module object which contains the error frame object for using as blank frame
+ *
+ */
+vx_status tiovx_capture_module_send_error_frame(TIOVXCaptureModuleObj *captureObj);
 
 #ifdef __cplusplus
 }

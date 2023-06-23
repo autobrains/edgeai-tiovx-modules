@@ -202,6 +202,36 @@ vx_status tiovx_sensor_module_init(SensorObj *sensorObj, char *objName);
  */
 void tiovx_sensor_module_deinit(SensorObj *sensorObj);
 
+/** \brief Sensor module params init helper function
+ *
+ * This Sensor module params init function initializes the sensorObj
+ *
+ * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
+ *
+ */
+void tiovx_sensor_module_params_init(SensorObj *sensorObj);
+
+/** \brief Sensor module start helper function
+ *
+ * This Sensor module starts the sensor
+ *
+ * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
+ *
+ */
+vx_status tiovx_sensor_module_start(SensorObj *sensorObj);
+
+/** \brief Sensor module stop helper function
+ *
+ * This Sensor module stops the sensor
+ *
+ * \param [in,out] sensorObj    Sensor Module object which contains the sensor parameters
+ *
+ */
+vx_status tiovx_sensor_module_stop(SensorObj *sensorObj);
+
+
+
+/******************************************************************************************/
 
 /** THESE BELOW APIS ARE BEING USED BY EDGEAI_GST_PLUGINS
  *  These plugins are used by optiflow and edgeai-gst-apps

@@ -355,6 +355,45 @@ void tiovx_sensor_module_deinit(SensorObj *sensorObj)
     appDeInitImageSensor(sensorObj->sensor_name);
 }
 
+void tiovx_sensor_module_params_init(SensorObj *sensorObj)
+{
+    strcpy(sensorObj->sensor_name, SENSOR_SONY_IMX390_UB953_D3);
+    sensorObj->num_sensors_found = 0;
+    sensorObj->sensor_features_enabled = 0;
+    sensorObj->sensor_features_supported = 0;
+    sensorObj->sensor_dcc_enabled = 0;
+    sensorObj->sensor_wdr_enabled = 0;
+    sensorObj->sensor_exp_control_enabled = 0;
+    sensorObj->sensor_gain_control_enabled = 0;
+    sensorObj->ch_mask = 1;
+    sensorObj->enable_ldc = 1;
+    sensorObj->num_cameras_enabled = 1;
+    sensorObj->usecase_option = TIOVX_SENSOR_MODULE_FEATURE_CFG_UC0;
+    sensorObj->is_interactive = 0;
+    sensorObj->sensor_index = 0;
+}
+
+vx_status tiovx_sensor_module_start(SensorObj *sensorObj)
+{
+    vx_status status = VX_SUCCESS;
+
+    status = appStartImageSensor(sensorObj->sensor_name, sensorObj->ch_mask);
+
+    return status;
+}
+
+vx_status tiovx_sensor_module_stop(SensorObj *sensorObj)
+{
+    vx_status status = VX_SUCCESS;
+
+    status = appStopImageSensor(sensorObj->sensor_name, sensorObj->ch_mask);
+
+    return status;
+}
+
+
+
+/*****************************************************************************/
 
 /* THE BELOW APIS ARE ONLY USED BY EDGEAI-GST-APP STACK (EDGEAI_GST_PLUGINS) */
 
