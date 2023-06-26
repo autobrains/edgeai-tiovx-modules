@@ -259,6 +259,17 @@ static vx_status tiovx_viss_module_create_inputs(vx_context context, TIOVXVISSMo
                 break;
             }
             obj->ae_awb_result_handle[buf] = (vx_user_data_object)vxGetObjectArrayItem((vx_object_array)obj->ae_awb_result_arr[buf], 0);
+
+            for (int i=0; i < sensorObj->num_cameras_enabled; i++) {
+                void *map_ptr;
+                vx_map_id map_id;
+                vx_user_data_object ae_awb_result_obj = NULL;
+
+                ae_awb_result_obj = (vx_user_data_object)vxGetObjectArrayItem((vx_object_array)obj->ae_awb_result_arr[buf], i);
+                vxMapUserDataObject(ae_awb_result_obj, 0, sizeof(tivx_ae_awb_params_t), &map_id, &map_ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST, 0);
+                vxUnmapUserDataObject(ae_awb_result_obj, map_id);
+                vxReleaseReference((vx_reference *)&ae_awb_result_obj);
+            }
         }
         vxReleaseUserDataObject(&ae_awb_result);
     }
