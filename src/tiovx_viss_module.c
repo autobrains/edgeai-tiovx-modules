@@ -700,7 +700,10 @@ vx_status tiovx_viss_module_deinit(TIOVXVISSModuleObj *obj)
             if((vx_status)VX_SUCCESS == status)
             {
                 TIOVX_MODULE_PRINTF("[VISS-MODULE] Releasing ae-awb result arr!\n");
-                status = vxReleaseObjectArray(&obj->ae_awb_result_arr[buf]);
+                if(obj->ae_awb_result_arr[buf] != NULL)
+                {
+                    status = vxReleaseObjectArray(&obj->ae_awb_result_arr[buf]);
+                }
             }
         }
     }
@@ -907,7 +910,14 @@ vx_status tiovx_viss_module_create(vx_graph graph, TIOVXVISSModuleObj *obj, vx_o
     }
     else
     {
-        ae_awb_result = (vx_user_data_object)vxGetObjectArrayItem(obj->ae_awb_result_arr[0], 0);
+        if(obj->ae_awb_result_arr[0] == NULL)
+        {
+            ae_awb_result = NULL;
+        }
+        else
+        {
+            ae_awb_result = (vx_user_data_object)vxGetObjectArrayItem(obj->ae_awb_result_arr[0], 0);
+        }
     }
 
     h3a_stats = (vx_user_data_object)vxGetObjectArrayItem(obj->h3a_stats_arr[0], 0);
@@ -996,7 +1006,10 @@ vx_status tiovx_viss_module_create(vx_graph graph, TIOVXVISSModuleObj *obj, vx_o
     }
 
     tivxReleaseRawImage(&raw_image);
-    vxReleaseUserDataObject(&ae_awb_result);
+    if(ae_awb_result != NULL)
+    {
+        vxReleaseUserDataObject(&ae_awb_result);
+    }
     vxReleaseUserDataObject(&h3a_stats);
 
     if(obj->output_select[0] == TIOVX_VISS_MODULE_OUTPUT_EN)
