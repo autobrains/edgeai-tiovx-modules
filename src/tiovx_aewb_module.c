@@ -318,7 +318,11 @@ vx_status tiovx_aewb_module_create(vx_graph graph, TIOVXAewbModuleObj *aewbObj, 
     }
 
     vxSetReferenceName((vx_reference)aewbObj->node, "aewb_node");
+#if defined(SOC_AM62A)
+    vxSetNodeTarget(aewbObj->node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
+#else
     vxSetNodeTarget(aewbObj->node, VX_TARGET_STRING, TIVX_TARGET_MCU2_0);
+#endif
 
     vx_bool replicate[] = { vx_true_e, vx_true_e, vx_true_e, vx_false_e, vx_true_e, vx_false_e};
     vxReplicateNode(graph, aewbObj->node, replicate, 6);
