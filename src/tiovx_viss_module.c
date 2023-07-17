@@ -220,6 +220,11 @@ static vx_status tiovx_viss_module_configure_dcc_params(vx_context context, TIOV
         }
     }
 
+    if(fp != NULL)
+    {
+        fclose(fp);
+    }
+
     return status;
 }
 

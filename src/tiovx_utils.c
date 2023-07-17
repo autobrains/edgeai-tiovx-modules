@@ -154,6 +154,12 @@ vx_status assign_single_raw_image_buffer(tivx_raw_image image, void *virtAddr[],
         vx_int32 bufsize[4];
         vx_int32 p;
 
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
+
         for(p = 0; p < num_planes; p++)
         {
             addr[p] = virtAddr[p];
@@ -178,6 +184,12 @@ vx_status release_single_raw_image_buffer(tivx_raw_image image, void *virtAddr[]
         void * addr[4];
         vx_int32 bufsize[4];
         vx_int32 p;
+
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
 
         for(p = 0; p < num_planes; p++)
         {
@@ -423,6 +435,12 @@ vx_status allocate_single_image_buffer(vx_image image, void *virtAddr[], vx_uint
                                             plane_sizes,
                                             TIOVX_MODULES_MAX_REF_HANDLES,
                                             &num_planes);
+
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
 
         if((vx_status)VX_SUCCESS == status)
         {

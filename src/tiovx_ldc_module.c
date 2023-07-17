@@ -119,6 +119,11 @@ static vx_status tiovx_ldc_module_configure_dcc_params(vx_context context, TIOVX
         }
     }
 
+    if(fp != NULL)
+    {
+        fclose(fp);
+    }
+
     return status;
 }
 

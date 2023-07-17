@@ -209,9 +209,18 @@ vx_status tiovx_sensor_module_query(SensorObj *sensorObj)
             ret = scanf("%d", &num_cameras);
             while ((c = getchar()) != '\n' && c != EOF);
             sensorObj->num_cameras_enabled = num_cameras;
-            if( (1==ret) && ((sensorObj->num_cameras_enabled > sensorObj->sensorParams.num_channels) || (sensorObj->num_cameras_enabled <= 0)) )
+
+            if( (1==ret) &&
+                ( (sensorObj->num_cameras_enabled > sensorObj->sensorParams.num_channels) ||
+                (sensorObj->num_cameras_enabled <= 0) ) )
             {
                 sensorObj->num_cameras_enabled = 0;
+                TIOVX_MODULE_ERROR("Invalid selection %d. Try again \n", num_cameras);
+            }
+            else if((sensorObj->num_cameras_enabled > ISS_SENSORS_MAX_SUPPORTED_SENSOR))
+            {
+                sensorObj->num_cameras_enabled = 0;
+                TIOVX_MODULE_ERROR("Number of cameras should not be greater than %d. \n", ISS_SENSORS_MAX_SUPPORTED_SENSOR);
                 TIOVX_MODULE_ERROR("Invalid selection %d. Try again \n", num_cameras);
             }
         }

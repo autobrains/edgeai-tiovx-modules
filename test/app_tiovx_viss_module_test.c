@@ -294,6 +294,7 @@ static vx_status app_init(AppObj *obj)
         if(aewb_dcc_buf == NULL)
         {
             APP_ERROR("Unable to allocate %d bytes for aewb_dcc_buf \n", aewb_dcc_file_size);
+            fclose(aewb_fp);
             return VX_FAILURE;
         }
 
@@ -302,6 +303,8 @@ static vx_status app_init(AppObj *obj)
         if(read_size != aewb_dcc_file_size)
         {
             APP_ERROR("Bytes read %d bytes is not same as file size %d \n", read_size, aewb_dcc_file_size);
+            fclose(aewb_fp);
+            free(aewb_dcc_buf);
             return VX_FAILURE;
         }
 
@@ -321,6 +324,7 @@ static vx_status app_init(AppObj *obj)
         {
             APP_ERROR("Error during 2A create!\n");
         }
+        fclose(aewb_fp);
     }
 
     return status;
