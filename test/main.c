@@ -82,6 +82,7 @@
 #define APP_MODULES_TEST_DOF_VIZ (1)
 #define APP_MODULES_TEST_SDE (1)
 #define APP_MODULES_TEST_SDE_VIZ (1)
+#define APP_MODULES_TEST_DISPLAY (1)
 #endif
 
 char *EDGEAI_DATA_PATH;
@@ -235,6 +236,16 @@ int main(int argc, char *argv[])
         int app_modules_viss_msc_ldc_test(int argc, char* argv[]);
 
         status = app_modules_viss_msc_ldc_test(argc, argv);
+    }
+#endif
+
+#if (APP_MODULES_TEST_DISPLAY)
+    if(status==0)
+    {
+        printf("Running Display module test\n");
+        int app_modules_display_test(int argc, char* argv[]);
+
+        status = app_modules_display_test(argc, argv);
     }
 #endif
 

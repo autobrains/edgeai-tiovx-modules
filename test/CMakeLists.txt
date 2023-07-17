@@ -23,7 +23,8 @@ if ("${TARGET_SOC}" STREQUAL "J721E" OR "${TARGET_SOC}" STREQUAL "J721S2" OR "${
          app_tiovx_dof_module_test.c
          app_tiovx_dof_viz_module_test.c
          app_tiovx_sde_module_test.c
-         app_tiovx_sde_viz_module_test.c)
+         app_tiovx_sde_viz_module_test.c
+         app_tiovx_display_module_test.c)
 endif()
 
 build_app(${PROJ_NAME}
