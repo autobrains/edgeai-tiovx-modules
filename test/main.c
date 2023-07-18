@@ -84,6 +84,7 @@
 #define APP_MODULES_TEST_SDE (1)
 #define APP_MODULES_TEST_SDE_VIZ (1)
 #define APP_MODULES_TEST_DISPLAY (1)
+#define APP_MODULES_TEST_SENSOR_CAPTURE (1)
 #endif
 
 char *EDGEAI_DATA_PATH;
@@ -257,6 +258,16 @@ int main(int argc, char *argv[])
         int app_modules_display_test(int argc, char* argv[]);
 
         status = app_modules_display_test(argc, argv);
+    }
+#endif
+
+#if (APP_MODULES_TEST_SENSOR_CAPTURE)
+    if(status==0)
+    {
+        printf("Running Capture module test\n");
+        int app_modules_sensor_capture_test(int argc, char* argv[]);
+
+        status = app_modules_sensor_capture_test(argc, argv);
     }
 #endif
 
