@@ -72,6 +72,7 @@
 #define APP_MODULES_TEST_VISS (1)
 #define APP_MODULES_TEST_VISS_LDC_MSC (1)
 #define APP_MODULES_TEST_PYRAMID (1)
+#define APP_MODULES_TEST_DL_PRE_PROC_TIDL_DL_POST_PROC (1)
 
 #if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
 #define APP_MODULES_TEST_COLOR_CONVERT (1)
@@ -236,6 +237,16 @@ int main(int argc, char *argv[])
         int app_modules_viss_msc_ldc_test(int argc, char* argv[]);
 
         status = app_modules_viss_msc_ldc_test(argc, argv);
+    }
+#endif
+
+#if (APP_MODULES_TEST_DL_PRE_PROC_TIDL_DL_POST_PROC)
+    if(status==0)
+    {
+        printf("Running PreProc-TIDL-PostProc module test\n");
+        int app_modules_dl_pre_proc_tidl_dl_post_proc_test(int argc, char* argv[]);
+
+        status = app_modules_dl_pre_proc_tidl_dl_post_proc_test(argc, argv);
     }
 #endif
 
