@@ -12,7 +12,6 @@ set(SRC_FILES
     app_tiovx_pyramid_module_test.c
     app_tiovx_dl_color_convert_module_test.c
     app_tiovx_dl_pre_proc_module_test.c
-    app_tiovx_dl_color_blend_module_test.c
     app_tiovx_viss_ldc_msc_test.c
     app_tiovx_dl_pre_proc_tidl_dl_post_proc.c
     main.c)

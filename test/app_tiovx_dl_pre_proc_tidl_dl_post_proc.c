@@ -74,6 +74,9 @@
 #define TIDL_CONFIG_FILE_PATH "/opt/vision_apps/test_data/tivx/tidl_models/tidl_io_mobilenet_v1_1.bin"
 #define TIDL_NETWORK_FILE_PATH "/opt/vision_apps/test_data/tivx/tidl_models/tidl_net_mobilenet_v1.bin"
 
+#define MAX_NUM_OF_TIDL_OUTPUT_TENSORS 8
+#define MAX_NUM_OF_TIDL_INPUT_TENSORS  4
+
 const char imgnet_labels[1001][256] =
 {
   "background",
@@ -1224,6 +1227,15 @@ static vx_status app_init(AppObj *obj)
 
         tidlObj->num_input_tensors  = obj->ioBufDesc.numInputBuf;
         tidlObj->num_output_tensors = obj->ioBufDesc.numOutputBuf;
+
+        if(tidlObj->num_input_tensors > MAX_NUM_OF_TIDL_INPUT_TENSORS ||
+          tidlObj->num_output_tensors > MAX_NUM_OF_TIDL_OUTPUT_TENSORS)
+        {
+            status = VX_FAILURE;
+            APP_ERROR("Number of input tensors cannot be greater than %d \n", tidlObj->num_input_tensors);
+            APP_ERROR("or Number of input tensors cannot be greater than %d \n", tidlObj->num_output_tensors);
+            return status;
+        }
 
         tidlObj->input[0].bufq_depth = APP_BUFQ_DEPTH;
         for(uint32_t i=0; i < tidlObj->num_output_tensors; i++)

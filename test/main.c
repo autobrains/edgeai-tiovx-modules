@@ -77,7 +77,6 @@
 #if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
 #define APP_MODULES_TEST_COLOR_CONVERT (1)
 #define APP_MODULES_TEST_DL_PRE_PROC (1)
-#define APP_MODULES_TEST_DL_COLOR_BLEND (1)
 #define APP_MODULES_TEST_DL_COLOR_CONVERT (1)
 #define APP_MODULES_TEST_DOF (1)
 #define APP_MODULES_TEST_DOF_VIZ (1)
@@ -148,16 +147,6 @@ int main(int argc, char *argv[])
         int app_modules_dl_pre_proc_test(int argc, char* argv[]);
 
         status = app_modules_dl_pre_proc_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_DL_COLOR_BLEND)
-    if(status==0)
-    {
-        printf("Running DL color-blend module test\n");
-        int app_modules_dl_color_blend_test(int argc, char* argv[]);
-
-        status = app_modules_dl_color_blend_test(argc, argv);
     }
 #endif
 

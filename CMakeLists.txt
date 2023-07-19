@@ -15,7 +15,6 @@ set(SRC_FILES
     src/tiovx_pyramid_module.c
     src/tiovx_dl_color_convert_module.c
     src/tiovx_dl_pre_proc_module.c
-    src/tiovx_dl_color_blend_module.c
     src/tiovx_tidl_module.c
     src/tiovx_dl_post_proc_module.c
     src/tiovx_capture_module.c
