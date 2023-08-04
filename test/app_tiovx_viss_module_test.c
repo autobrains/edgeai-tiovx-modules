@@ -179,9 +179,9 @@ static vx_status app_init(AppObj *obj)
         tivx_vpac_viss_params_init(&vissObj->params);
 
 #if defined(SOC_AM62A)        
-        snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/ov2312/dcc_viss.bin");
+        snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/ov2312/linear/dcc_viss.bin");
 #else
-        snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx219/dcc_viss.bin");
+        snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx219/linear/dcc_viss.bin");
 #endif
 
         vissObj->input.bufq_depth = APP_BUFQ_DEPTH;
@@ -273,9 +273,9 @@ static vx_status app_init(AppObj *obj)
         APP_PRINTF("VISS Init Done! \n");
 
 #if defined(SOC_AM62A)
-        char *aewb_dcc_file = "/opt/imaging/ov2312/dcc_2a.bin";
+        char *aewb_dcc_file = "/opt/imaging/ov2312/linear/dcc_2a.bin";
 #else
-        char *aewb_dcc_file = "/opt/imaging/imx219/dcc_2a.bin";
+        char *aewb_dcc_file = "/opt/imaging/imx219/linear/dcc_2a.bin";
 #endif
         FILE *aewb_fp = NULL;
 

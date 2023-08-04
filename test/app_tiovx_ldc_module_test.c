@@ -156,7 +156,7 @@ static vx_status app_init(AppObj *obj)
         tiovx_querry_sensor(sensorObj);
         tiovx_init_sensor(sensorObj,"SENSOR_SONY_IMX390_UB953_D3");
 
-        snprintf(ldcObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx390/dcc_ldc_wdr.bin");
+        snprintf(ldcObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx390/wdr/dcc_ldc_wdr.bin");
         snprintf(ldcObj->lut_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s/raw_images/modules_test/imx390_ldc_lut_1920x1080.bin", EDGEAI_DATA_PATH);
 
         ldcObj->ldc_mode = TIOVX_MODULE_LDC_OP_MODE_DCC_DATA; //TIOVX_MODULE_LDC_OP_MODE_MESH_IMAGE
