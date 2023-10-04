@@ -82,6 +82,7 @@ include_directories(${PROJECT_SOURCE_DIR}
                     ${TARGET_FS}/usr/include/processor_sdk/imaging/sensor_drv/include
                     ${TARGET_FS}/usr/include/processor_sdk/imaging/ti_2a_wrapper/include
                     ${TARGET_FS}/usr/include/processor_sdk/imaging/kernels/include
+                    ${TARGET_FS}/usr/include/processor_sdk/imaging/utils/itt_server/include/
                     ${TARGET_FS}/usr/include/processor_sdk/tidl_j7/arm-tidl/rt/inc/
                     ${TARGET_FS}/usr/include/processor_sdk/tidl_j7/arm-tidl/tiovx_kernels/include
                     ${TARGET_FS}/usr/include/processor_sdk/tiovx/include
