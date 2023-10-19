@@ -77,16 +77,17 @@ int main(int argc, char *argv[])
 {
     int status = 0;
     int i = 0;
+    size_t total_choices = sizeof(CHOICES)/ sizeof(CHOICES[0]);
 
     if (argc > 1)
     {
-        for(i = 0; i < sizeof CHOICES/ sizeof CHOICES[0]; i++)
+        for(i = 0; i < total_choices; i++)
         {
             CHOICES[i] = NULL;
         }
     }
 
-    for(i = 0; optind < argc && i < sizeof CHOICES/ sizeof CHOICES[0]; optind++, i++)
+    for(i = 0; optind < argc && i < total_choices; optind++, i++)
     {
         CHOICES[i] = argv[optind];
     }
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
     status = appInit();
 
 
-    for(i = 0; CHOICES[i] != NULL; i++)
+    for(i = 0; i < total_choices && CHOICES[i] != NULL; i++)
     {
 
         if(status == 0 && strcmp(CHOICES[i], "multiscaler") == 0)
