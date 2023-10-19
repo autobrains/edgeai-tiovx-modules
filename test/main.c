@@ -65,32 +65,31 @@
 #include <TI/tivx.h>
 #include <app_init.h>
 #include <stdlib.h>
-
-#define APP_MODULES_TEST_MULTI_SCALER (1)
-#define APP_MODULES_TEST_IMG_MOSAIC (1)
-#define APP_MODULES_TEST_LDC (1)
-#define APP_MODULES_TEST_VISS (1)
-#define APP_MODULES_TEST_VISS_LDC_MSC (1)
-#define APP_MODULES_TEST_PYRAMID (1)
-#define APP_MODULES_TEST_DL_PRE_PROC_TIDL_DL_POST_PROC (1)
-
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
-#define APP_MODULES_TEST_COLOR_CONVERT (1)
-#define APP_MODULES_TEST_DL_PRE_PROC (1)
-#define APP_MODULES_TEST_DL_COLOR_CONVERT (1)
-#define APP_MODULES_TEST_DOF (1)
-#define APP_MODULES_TEST_DOF_VIZ (1)
-#define APP_MODULES_TEST_SDE (1)
-#define APP_MODULES_TEST_SDE_VIZ (1)
-#define APP_MODULES_TEST_DISPLAY (1)
-#define APP_MODULES_TEST_SENSOR_CAPTURE (1)
-#endif
+#include <getopt.h>
 
 char *EDGEAI_DATA_PATH;
+char *CHOICES[] = {"multiscaler","colorconvert","dlcolorconvert","mosaic",
+                   "dlpreproc", "ldc", "viss", "pyramid", "dof", "dof-viz",
+                   "sde", "sde-viz", "viss-ldc-msc", "preproc-tidl-postproc",
+                   "display", "capture"};
 
 int main(int argc, char *argv[])
 {
     int status = 0;
+    int i = 0;
+
+    if (argc > 1)
+    {
+        for(i = 0; i < sizeof CHOICES/ sizeof CHOICES[0]; i++)
+        {
+            CHOICES[i] = NULL;
+        }
+    }
+
+    for(i = 0; optind < argc && i < sizeof CHOICES/ sizeof CHOICES[0]; optind++, i++)
+    {
+        CHOICES[i] = argv[optind];
+    }
 
     EDGEAI_DATA_PATH = getenv("EDGEAI_DATA_PATH");
     if (EDGEAI_DATA_PATH == NULL)
@@ -100,165 +99,166 @@ int main(int argc, char *argv[])
 
     status = appInit();
 
-#if (APP_MODULES_TEST_MULTI_SCALER)
-    if(status==0)
-    {
-        printf("Running multi-scaler module test\n");
-        int app_modules_scaler_test(int argc, char* argv[]);
 
-        status = app_modules_scaler_test(argc, argv);
-    }
+    for(i = 0; CHOICES[i] != NULL; i++)
+    {
+
+        if(status == 0 && strcmp(CHOICES[i], "multiscaler") == 0)
+        {
+            printf("[Running multi-scaler module test]\n");
+            int app_modules_scaler_test(int argc, char* argv[]);
+
+            status = app_modules_scaler_test(argc, argv);
+        }
+
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "colorconvert") == 0)
+        {
+            printf("[Running color convert module test]\n");
+            int app_modules_color_convert_test(int argc, char* argv[]);
+
+            status = app_modules_color_convert_test(argc, argv);
+        }
 #endif
 
-#if (APP_MODULES_TEST_COLOR_CONVERT)
-    if(status==0)
-    {
-        printf("Running color convert module test\n");
-        int app_modules_color_convert_test(int argc, char* argv[]);
+        else if(status == 0 && strcmp(CHOICES[i], "dlcolorconvert") == 0)
+        {
+            printf("[Running DL color convert module test]\n");
+            int app_modules_dl_color_convert_test(int argc, char* argv[]);
 
-        status = app_modules_color_convert_test(argc, argv);
-    }
+            status = app_modules_dl_color_convert_test(argc, argv);
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "mosaic") == 0)
+        {
+            printf("[Running image mosaic module test]\n");
+            int app_modules_img_mosaic_test(int argc, char* argv[]);
+
+            status = app_modules_img_mosaic_test(argc, argv);
+
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "dlpreproc") == 0)
+        {
+            printf("[Running DL pre-proc module test]\n");
+            int app_modules_dl_pre_proc_test(int argc, char* argv[]);
+
+            status = app_modules_dl_pre_proc_test(argc, argv);
+
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "ldc") == 0)
+        {
+            printf("[Running LDC module test]\n");
+            int app_modules_ldc_test(int argc, char* argv[]);
+
+            status = app_modules_ldc_test(argc, argv);
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "viss") == 0)
+        {
+            printf("[Running VISS module test]\n");
+            int app_modules_viss_test(int argc, char* argv[]);
+
+            status = app_modules_viss_test(argc, argv);
+
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "pyramid") == 0)
+        {
+            printf("[Running PYRAMID module test]\n");
+            int app_modules_pyramid_test(int argc, char* argv[]);
+
+            status = app_modules_pyramid_test(argc, argv);
+
+        }
+
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+
+        else if(status == 0 && strcmp(CHOICES[i], "dof") == 0)
+        {
+            printf("[Running DOF module test]\n");
+            int app_modules_dof_test(int argc, char* argv[]);
+
+            status = app_modules_dof_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_DL_COLOR_CONVERT)
-    if(status==0)
-    {
-        printf("Running DL color convert module test\n");
-        int app_modules_dl_color_convert_test(int argc, char* argv[]);
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "dof-viz") == 0)
+        {
+            printf("[Running DOF Viz module test]\n");
+            int app_modules_dof_viz_test(int argc, char* argv[]);
 
-        status = app_modules_dl_color_convert_test(argc, argv);
-    }
+            status = app_modules_dof_viz_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_IMG_MOSAIC)
-    if(status==0)
-    {
-        printf("Running image mosaic module test\n");
-        int app_modules_img_mosaic_test(int argc, char* argv[]);
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "sde") == 0)
+        {
+            printf("[Running SDE module test]\n");
+            int app_modules_sde_test(int argc, char* argv[]);
 
-        status = app_modules_img_mosaic_test(argc, argv);
-    }
+            status = app_modules_sde_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_DL_PRE_PROC)
-    if(status==0)
-    {
-        printf("Running DL pre-proc module test\n");
-        int app_modules_dl_pre_proc_test(int argc, char* argv[]);
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "sde-viz") == 0)
+        {
+            printf("[Running SDE Viz module test]\n");
+            int app_modules_sde_viz_test(int argc, char* argv[]);
 
-        status = app_modules_dl_pre_proc_test(argc, argv);
-    }
+            status = app_modules_sde_viz_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_LDC)
-    if(status==0)
-    {
-        printf("Running LDC module test\n");
-        int app_modules_ldc_test(int argc, char* argv[]);
+        else if(status == 0 && strcmp(CHOICES[i], "viss-ldc-msc") == 0)
+        {
+            printf("[Running VISS-LDC-MSC module test]\n");
+            int app_modules_viss_msc_ldc_test(int argc, char* argv[]);
 
-        status = app_modules_ldc_test(argc, argv);
-    }
+            status = app_modules_viss_msc_ldc_test(argc, argv);
+
+        }
+
+        else if(status == 0 && strcmp(CHOICES[i], "preproc-tidl-postproc") == 0)
+        {
+            printf("[Running PreProc-TIDL-PostProc module test]\n");
+            int app_modules_dl_pre_proc_tidl_dl_post_proc_test(int argc, char* argv[]);
+
+            status = app_modules_dl_pre_proc_tidl_dl_post_proc_test(argc, argv);
+
+        }
+
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "display") == 0)
+        {
+            printf("[Running Display module test]\n");
+            int app_modules_display_test(int argc, char* argv[]);
+
+            status = app_modules_display_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_VISS)
-    if(status==0)
-    {
-        printf("Running VISS module test\n");
-        int app_modules_viss_test(int argc, char* argv[]);
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+        else if(status == 0 && strcmp(CHOICES[i], "capture") == 0)
+        {
+            printf("[Running Capture module test]\n");
+            int app_modules_sensor_capture_test(int argc, char* argv[]);
 
-        status = app_modules_viss_test(argc, argv);
-    }
+            status = app_modules_sensor_capture_test(argc, argv);
+
+        }
 #endif
 
-#if (APP_MODULES_TEST_PYRAMID)
-    if(status==0)
-    {
-        printf("Running PYRAMID module test\n");
-        int app_modules_pyramid_test(int argc, char* argv[]);
-
-        status = app_modules_pyramid_test(argc, argv);
     }
-#endif
-
-#if (APP_MODULES_TEST_DOF)
-    if(status==0)
-    {
-        printf("Running DOF module test\n");
-        int app_modules_dof_test(int argc, char* argv[]);
-
-        status = app_modules_dof_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_DOF_VIZ)
-    if(status==0)
-    {
-        printf("Running DOF Viz module test\n");
-        int app_modules_dof_viz_test(int argc, char* argv[]);
-
-        status = app_modules_dof_viz_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_SDE)
-    if(status==0)
-    {
-        printf("Running SDE module test\n");
-        int app_modules_sde_test(int argc, char* argv[]);
-
-        status = app_modules_sde_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_SDE_VIZ)
-    if(status==0)
-    {
-        printf("Running SDE Viz module test\n");
-        int app_modules_sde_viz_test(int argc, char* argv[]);
-
-        status = app_modules_sde_viz_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_VISS_LDC_MSC)
-    if(status==0)
-    {
-        printf("Running VISS-LDC-MSC module test\n");
-        int app_modules_viss_msc_ldc_test(int argc, char* argv[]);
-
-        status = app_modules_viss_msc_ldc_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_DL_PRE_PROC_TIDL_DL_POST_PROC)
-    if(status==0)
-    {
-        printf("Running PreProc-TIDL-PostProc module test\n");
-        int app_modules_dl_pre_proc_tidl_dl_post_proc_test(int argc, char* argv[]);
-
-        status = app_modules_dl_pre_proc_tidl_dl_post_proc_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_DISPLAY)
-    if(status==0)
-    {
-        printf("Running Display module test\n");
-        int app_modules_display_test(int argc, char* argv[]);
-
-        status = app_modules_display_test(argc, argv);
-    }
-#endif
-
-#if (APP_MODULES_TEST_SENSOR_CAPTURE)
-    if(status==0)
-    {
-        printf("Running Capture module test\n");
-        int app_modules_sensor_capture_test(int argc, char* argv[]);
-
-        status = app_modules_sensor_capture_test(argc, argv);
-    }
-#endif
 
     printf("All tests complete!\n");
 
