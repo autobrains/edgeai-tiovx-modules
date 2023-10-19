@@ -62,6 +62,7 @@
 
 #include "tiovx_ldc_module.h"
 #include <tiovx_utils.h>
+#include <itt_server.h>
 
 static vx_status tiovx_ldc_module_configure_dcc_params(vx_context context, TIOVXLDCModuleObj *obj)
 {

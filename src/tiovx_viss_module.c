@@ -61,6 +61,7 @@
  */
 
 #include "tiovx_viss_module.h"
+#include <itt_server.h>
 
 static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVISSModuleObj *obj)
 {
