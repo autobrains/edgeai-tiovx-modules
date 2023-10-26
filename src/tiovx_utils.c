@@ -509,7 +509,7 @@ vx_status assign_single_image_buffer(vx_image image, void *virtAddr[], vx_uint32
         status = tivxReferenceImportHandle((vx_reference)image,
                                         (const void **)addr,
                                         (const uint32_t *)bufsize,
-                                        num_planes);
+                                        1);
     }
 
     return status;
@@ -536,7 +536,7 @@ vx_status release_single_image_buffer(vx_image image, void *virtAddr[], vx_uint3
         status = tivxReferenceImportHandle((vx_reference)image,
                                             (const void **)addr,
                                             (const uint32_t *)bufsize,
-                                            num_planes);
+                                            1);
     }
 
     return status;
