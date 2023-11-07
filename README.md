@@ -60,7 +60,7 @@ cd edgeai-tiovx-modules
 mkdir build
 cd build
 source ../cmake/setup_cross_compile.sh
-export SOC=(j721e/j721s2/j784s4/am62a)
+export SOC=(j721e/j721s2/j784s4/j722s/am62a)
 cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/cross_compile_aarch64.cmake ..
 make -j2
 make install DESTDIR=<path/to/targetfs>
