@@ -137,7 +137,7 @@ typedef struct {
     vx_tensor tensor_handle[TIOVX_MODULES_MAX_BUFQ_DEPTH];
 
     vx_int32 num_dims;
-    vx_int32 dim_sizes[VX_TENSOR_NUMBER_OF_DIMS];
+    vx_int32 dim_sizes[TIVX_CONTEXT_MAX_TENSOR_DIMS];
     vx_int32 datatype;
 
     vx_int32 graph_parameter_index;

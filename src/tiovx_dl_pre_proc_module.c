@@ -137,7 +137,7 @@ static vx_status tiovx_dl_pre_proc_module_create_output(vx_context context, TIOV
 {
     vx_status status = VX_SUCCESS;
 
-    vx_size tensor_sizes[VX_TENSOR_NUMBER_OF_DIMS];
+    vx_size tensor_sizes[TIVX_CONTEXT_MAX_TENSOR_DIMS];
     vx_tensor out_tensor;
     vx_int32 buf, dim;
 
