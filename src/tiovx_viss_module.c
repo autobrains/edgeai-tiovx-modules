@@ -76,7 +76,7 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
 
     if(obj->output_select[0] == TIOVX_VISS_MODULE_OUTPUT_EN)
     {
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(obj->params.enable_ir_op)
         {
             if(obj->output0.color_format == VX_DF_IMAGE_U8)
@@ -111,7 +111,7 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
         {
             obj->params.fcp[0].mux_output2  = TIVX_VPAC_VISS_MUX2_YUV422;
         }
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         else if((obj->output2.color_format == VX_DF_IMAGE_U16) &&
                 (obj->params.enable_ir_op))
         {
@@ -128,7 +128,7 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
         obj->params.fcp[0].mux_output4  = 0;
     }
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(obj->params.bypass_pcid)
         obj->params.enable_ir_op = TIVX_VPAC_VISS_IR_DISABLE;
 

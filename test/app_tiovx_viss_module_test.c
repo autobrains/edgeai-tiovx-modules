@@ -70,7 +70,7 @@
 #define INPUT_WIDTH_OV2312  (1600)
 #define INPUT_HEIGHT_OV2312 (1300)
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     #define INPUT_WIDTH  INPUT_WIDTH_OV2312
     #define INPUT_HEIGHT INPUT_HEIGHT_OV2312
 #else
@@ -111,7 +111,7 @@ static vx_status app_verify_graph(AppObj *obj);
 static vx_status app_run_graph(AppObj *obj);
 static void app_delete_graph(AppObj *obj);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
 static int32_t OV2312_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms);
 #else
 static int32_t IMX219_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms);
@@ -170,7 +170,7 @@ static vx_status app_init(AppObj *obj)
 
         SensorObj *sensorObj = &obj->sensorObj;
         tiovx_querry_sensor(sensorObj);
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         tiovx_init_sensor(sensorObj,"SENSOR_OV2312_UB953_LI");
 #else
         tiovx_init_sensor(sensorObj,"SENSOR_SONY_IMX219_RPI");
@@ -178,7 +178,7 @@ static vx_status app_init(AppObj *obj)
 
         tivx_vpac_viss_params_init(&vissObj->params);
 
-#if defined(SOC_AM62A)        
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/ov2312/linear/dcc_viss.bin");
 #else
         snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx219/linear/dcc_viss.bin");
@@ -192,7 +192,7 @@ static vx_status app_init(AppObj *obj)
         vissObj->input.params.line_interleaved = vx_false_e;
         vissObj->input.params.meta_height_before = 0;
         vissObj->input.params.meta_height_after = 0;
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         /* information here is hardcoded for OV2312 sensor */
         /* Typically this information should be obtained by querying the sensor */
         vissObj->input.params.format[0].pixel_container = TIVX_RAW_IMAGE_16_BIT;
@@ -206,7 +206,7 @@ static vx_status app_init(AppObj *obj)
 
         vissObj->ae_awb_result_bufq_depth = APP_BUFQ_DEPTH;
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
 
         vissObj->params.bypass_pcid = 0;
 
@@ -272,7 +272,7 @@ static vx_status app_init(AppObj *obj)
         status = tiovx_viss_module_init(obj->context, vissObj, sensorObj);
         APP_PRINTF("VISS Init Done! \n");
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         char *aewb_dcc_file = "/opt/imaging/ov2312/linear/dcc_2a.bin";
 #else
         char *aewb_dcc_file = "/opt/imaging/imx219/linear/dcc_2a.bin";
@@ -391,7 +391,7 @@ static vx_status app_create_graph(AppObj *obj)
 
     if((vx_status)VX_SUCCESS == status)
     {
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(obj->vissObj.params.enable_ir_op)
         {
             status = add_graph_parameter_by_node_index(obj->graph, obj->vissObj.node, 4);
@@ -456,7 +456,7 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     char input_filename[100];
     char output_filename[100];
 
@@ -471,7 +471,7 @@ static vx_status app_run_graph(AppObj *obj)
 #endif
 
     tivx_raw_image input_o;
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     vx_image output0_o;
 #endif
     vx_image output2_o;
@@ -484,7 +484,7 @@ static vx_status app_run_graph(AppObj *obj)
     int32_t frame_count;
 
     void *inAddr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     void *out0Addr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
 #endif
     void *out2Addr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
@@ -492,7 +492,7 @@ static vx_status app_run_graph(AppObj *obj)
     void *h3aAddr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
 
     vx_uint32 inSizes[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES];
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     vx_uint32 out0Sizes[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES];
 #endif
     vx_uint32 out2Sizes[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES];
@@ -501,7 +501,7 @@ static vx_status app_run_graph(AppObj *obj)
 
     allocate_raw_image_buffers(&vissObj->input, inAddr, inSizes);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(vissObj->params.enable_ir_op)
         allocate_image_buffers(&vissObj->output0, out0Addr, out0Sizes);
     
@@ -518,7 +518,7 @@ static vx_status app_run_graph(AppObj *obj)
 
     assign_raw_image_buffers(&vissObj->input, inAddr[bufq], inSizes[bufq], bufq);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(vissObj->params.enable_ir_op)
         assign_image_buffers(&vissObj->output0, out0Addr[bufq], out0Sizes[bufq], bufq);
     if(vissObj->params.enable_bayer_op)
@@ -544,7 +544,7 @@ static vx_status app_run_graph(AppObj *obj)
 
         APP_PRINTF("Enqueueing output image buffers!\n");
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(vissObj->params.enable_ir_op)
             vxGraphParameterEnqueueReadyRef(obj->graph, vissObj->output0.graph_parameter_index, (vx_reference*)&vissObj->output0.image_handle[0], 1);
         if(vissObj->params.enable_bayer_op)
@@ -568,7 +568,7 @@ static vx_status app_run_graph(AppObj *obj)
 
         vxGraphParameterDequeueDoneRef(obj->graph, vissObj->input.graph_parameter_index, (vx_reference*)&input_o, 1, &num_refs);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(vissObj->params.enable_ir_op)
             vxGraphParameterDequeueDoneRef(obj->graph, vissObj->output0.graph_parameter_index, (vx_reference*)&output0_o, 1, &num_refs);
         if(vissObj->params.enable_bayer_op)
@@ -580,7 +580,7 @@ static vx_status app_run_graph(AppObj *obj)
         vxGraphParameterDequeueDoneRef(obj->graph, vissObj->ae_awb_result_graph_parameter_index, (vx_reference*)&aewb_o, 1, &num_refs);
         vxGraphParameterDequeueDoneRef(obj->graph, vissObj->h3a_stats_graph_parameter_index, (vx_reference*)&h3a_o, 1, &num_refs);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(vissObj->params.enable_ir_op)
             writeImage(output_filename, vissObj->output0.image_handle[0]);
         if(vissObj->params.enable_bayer_op)
@@ -602,7 +602,7 @@ static vx_status app_run_graph(AppObj *obj)
             vxMapUserDataObject(h3a_o, 0, sizeof(tivx_h3a_data_t), &h3a_buf_map_id, (void **)&h3a_buf, VX_READ_ONLY, VX_MEMORY_TYPE_HOST, 0);
             vxMapUserDataObject(aewb_o, 0, sizeof(tivx_ae_awb_params_t), &aewb_buf_map_id, (void **)&aewb_buf, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
             OV2312_GetExpPrgFxn(&obj->sensor_in_data.ae_dynPrms);
 #else
             IMX219_GetExpPrgFxn(&obj->sensor_in_data.ae_dynPrms);
@@ -619,7 +619,7 @@ static vx_status app_run_graph(AppObj *obj)
 
     release_raw_image_buffers(&vissObj->input, inAddr[bufq], inSizes[bufq], bufq);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(vissObj->params.enable_ir_op)
         release_image_buffers(&vissObj->output0, out0Addr[bufq], out0Sizes[bufq], bufq);
     if(vissObj->params.enable_bayer_op)
@@ -633,7 +633,7 @@ static vx_status app_run_graph(AppObj *obj)
 
     delete_raw_image_buffers(&vissObj->input, inAddr, inSizes);
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(vissObj->params.enable_ir_op)
         delete_image_buffers(&vissObj->output0, out0Addr, out0Sizes);
     if(vissObj->params.enable_bayer_op)
@@ -648,7 +648,7 @@ static vx_status app_run_graph(AppObj *obj)
     return status;
 }
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
 /* Typically this is obtained by querying the sensor */
 static int32_t OV2312_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms)
 {
