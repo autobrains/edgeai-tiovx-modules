@@ -71,7 +71,6 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
 
     obj->params.sensor_dcc_id       = sensorObj->sensorParams.dccId;
     obj->params.use_case            = 0;
-    obj->params.fcp[0].ee_mode      = TIVX_VPAC_VISS_EE_MODE_OFF;
     obj->params.fcp[0].chroma_mode  = TIVX_VPAC_VISS_CHROMA_MODE_420;
 
     if(obj->output_select[0] == TIOVX_VISS_MODULE_OUTPUT_EN)
@@ -142,7 +141,6 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
     obj->params.h3a_in              = TIVX_VPAC_VISS_H3A_IN_LSC;  
 #endif
     obj->params.h3a_aewb_af_mode    = TIVX_VPAC_VISS_H3A_MODE_AEWB;
-    obj->params.bypass_nsf4         = 0;
     obj->params.enable_ctx          = 1;
 
     if(sensorObj->sensor_wdr_enabled == 1)
