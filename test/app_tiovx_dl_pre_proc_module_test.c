@@ -132,7 +132,6 @@ static vx_status app_init(AppObj *obj)
     if(status == VX_SUCCESS)
     {
         tivxHwaLoadKernels(obj->context);
-        tivxImgProcLoadKernels(obj->context);
         tivxEdgeaiImgProcLoadKernels(obj->context);
     }
 
@@ -186,8 +185,6 @@ static void app_deinit(AppObj *obj)
     tiovx_dl_pre_proc_module_deinit(&obj->dlPreProcObj);
 
     tivxEdgeaiImgProcUnLoadKernels(obj->context);
-
-    tivxImgProcUnLoadKernels(obj->context);
 
     tivxHwaUnLoadKernels(obj->context);
 

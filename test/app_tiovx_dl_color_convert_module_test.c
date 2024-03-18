@@ -132,7 +132,6 @@ static vx_status app_init(AppObj *obj)
 
     if(status == VX_SUCCESS)
     {
-        tivxImgProcLoadKernels(obj->context);
         tivxEdgeaiImgProcLoadKernels(obj->context);
     }
 
@@ -164,7 +163,6 @@ static void app_deinit(AppObj *obj)
 {
     tiovx_dl_color_convert_module_deinit(&obj->colorConvertObj);
 
-    tivxImgProcUnLoadKernels(obj->context);
     tivxEdgeaiImgProcUnLoadKernels(obj->context);
 
     vxReleaseContext(&obj->context);
