@@ -63,7 +63,10 @@
 #include <tiovx_utils.h>
 #include "tiovx_sensor_module.h"
 #include "tiovx_viss_module.h"
+
+#if defined(TARGET_OS_LINUX)
 #include "ti_2a_wrapper.h"
+#endif
 
 #define APP_BUFQ_DEPTH   (1)
 #define NUM_ITERATIONS   (1)
@@ -92,6 +95,7 @@ typedef struct {
 
     TIOVXVISSModuleObj  vissObj;
 
+#if defined(TARGET_OS_LINUX)
     tivx_aewb_config_t aewbConfig;
 
     TI_2A_wrapper aewbObj;
@@ -99,6 +103,7 @@ typedef struct {
     sensor_config_get sensor_in_data;
 
     sensor_config_set sensor_out_data;
+#endif
 
 } AppObj;
 
@@ -111,10 +116,12 @@ static vx_status app_verify_graph(AppObj *obj);
 static vx_status app_run_graph(AppObj *obj);
 static void app_delete_graph(AppObj *obj);
 
+#if defined(TARGET_OS_LINUX)
 #if defined(SOC_AM62A) || defined(SOC_J722S)
 static int32_t OV2312_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms);
 #else
 static int32_t IMX219_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms);
+#endif
 #endif
 
 vx_status app_modules_viss_test(vx_int32 argc, vx_char* argv[])
@@ -272,6 +279,7 @@ static vx_status app_init(AppObj *obj)
         status = tiovx_viss_module_init(obj->context, vissObj, sensorObj);
         APP_PRINTF("VISS Init Done! \n");
 
+#if defined(TARGET_OS_LINUX)
 #if defined(SOC_AM62A) || defined(SOC_J722S)
         char *aewb_dcc_file = "/opt/imaging/ov2312/linear/dcc_2a.bin";
 #else
@@ -325,6 +333,7 @@ static vx_status app_init(AppObj *obj)
             APP_ERROR("Error during 2A create!\n");
         }
         fclose(aewb_fp);
+#endif
     }
 
     return status;
@@ -345,7 +354,9 @@ static void app_delete_graph(AppObj *obj)
 {
     tiovx_viss_module_delete(&obj->vissObj);
 
+#if defined(TARGET_OS_LINUX)
     TI_2A_wrapper_delete(&obj->aewbObj);
+#endif
 
     vxReleaseGraph(&obj->graph);
 }
@@ -602,14 +613,14 @@ static vx_status app_run_graph(AppObj *obj)
             vxMapUserDataObject(h3a_o, 0, sizeof(tivx_h3a_data_t), &h3a_buf_map_id, (void **)&h3a_buf, VX_READ_ONLY, VX_MEMORY_TYPE_HOST, 0);
             vxMapUserDataObject(aewb_o, 0, sizeof(tivx_ae_awb_params_t), &aewb_buf_map_id, (void **)&aewb_buf, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
+#if defined(TARGET_OS_LINUX)
 #if defined(SOC_AM62A) || defined(SOC_J722S)
             OV2312_GetExpPrgFxn(&obj->sensor_in_data.ae_dynPrms);
 #else
             IMX219_GetExpPrgFxn(&obj->sensor_in_data.ae_dynPrms);
 #endif
-
             TI_2A_wrapper_process(&obj->aewbObj, &obj->aewbConfig, h3a_buf, &obj->sensor_in_data, aewb_buf, &obj->sensor_out_data);
-
+#endif
             vxUnmapUserDataObject(h3a_o, h3a_buf_map_id);
             vxUnmapUserDataObject(aewb_o, aewb_buf_map_id);
         }
@@ -648,6 +659,7 @@ static vx_status app_run_graph(AppObj *obj)
     return status;
 }
 
+#if defined(TARGET_OS_LINUX)
 #if defined(SOC_AM62A) || defined(SOC_J722S)
 /* Typically this is obtained by querying the sensor */
 static int32_t OV2312_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms)
@@ -698,4 +710,5 @@ static int32_t IMX219_GetExpPrgFxn(IssAeDynamicParams *p_ae_dynPrms)
     p_ae_dynPrms->numAeDynParams = count;
     return (status);
 }
+#endif
 #endif

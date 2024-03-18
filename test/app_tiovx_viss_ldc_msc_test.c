@@ -65,7 +65,6 @@
 #include "tiovx_viss_module.h"
 #include "tiovx_multi_scaler_module.h"
 #include "tiovx_ldc_module.h"
-#include "ti_2a_wrapper.h"
 
 #define APP_BUFQ_DEPTH   (1)
 #define NUM_ITERATIONS   (1)
@@ -108,14 +107,6 @@ typedef struct {
     SensorObj  sensorObj;
 
     TIOVXVISSModuleObj  vissObj;
-
-    tivx_aewb_config_t aewbConfig;
-
-    TI_2A_wrapper aewbObj;
-
-    sensor_config_get sensor_in_data;
-
-    sensor_config_set sensor_out_data;
 
     TIOVXMultiScalerModuleObj  scalerObj;
 
@@ -223,57 +214,6 @@ static vx_status app_init(AppObj *obj)
         /* Initialize modules */
         status = tiovx_viss_module_init(obj->context, vissObj, sensorObj);
         APP_PRINTF("VISS Init Done! \n");
-
-        char *aewb_dcc_file = "/opt/imaging/imx390/linear/dcc_2a.bin";
-        FILE *aewb_fp = NULL;
-
-        aewb_fp = fopen(aewb_dcc_file, "rb");
-        if(aewb_fp == NULL)
-        {
-            APP_ERROR("Unable to open 2A DCC file path = %s \n", aewb_dcc_file);
-            return VX_FAILURE;
-        }
-
-        fseek(aewb_fp, 0, SEEK_END);
-        uint32_t aewb_dcc_file_size = ftell(aewb_fp);
-        fseek(aewb_fp, 0, SEEK_SET);
-
-        uint8_t *aewb_dcc_buf = (uint8_t *)malloc(aewb_dcc_file_size);
-        if(aewb_dcc_buf == NULL)
-        {
-            APP_ERROR("Unable to allocate %d bytes for aewb_dcc_buf \n", aewb_dcc_file_size);
-            fclose(aewb_fp);
-            return VX_FAILURE;
-        }
-
-        uint32_t read_size = fread(aewb_dcc_buf, sizeof(uint8_t), aewb_dcc_file_size, aewb_fp);
-
-        if(read_size != aewb_dcc_file_size)
-        {
-            APP_ERROR("Bytes read %d bytes is not same as file size %d \n", read_size, aewb_dcc_file_size);
-            fclose(aewb_fp);
-            free(aewb_dcc_buf);
-            return VX_FAILURE;
-        }
-
-        obj->aewbConfig.sensor_dcc_id       = sensorObj->sensorParams.dccId;
-        obj->aewbConfig.sensor_img_format   = 0; /*!<Image Format : BAYER = 0x0, Rest unsupported */
-        obj->aewbConfig.sensor_img_phase    = 3; /*!<Image Format : BGGR = 0, GBRG = 1, GRBG = 2, RGGB = 3 */
-
-        obj->aewbConfig.ae_mode = ALGORITHMS_ISS_AE_AUTO; /*!<AWB Mode : 0 = Auto, 1 = Manual, 2 = Disabled */
-        obj->aewbConfig.awb_mode = ALGORITHMS_ISS_AWB_AUTO; /*!<AE Mode : 0 = Auto, 1 = Manual, 2 = Disabled */
-
-        obj->aewbConfig.awb_num_skip_frames = 0; /*!<0 = Process every frame */
-        obj->aewbConfig.ae_num_skip_frames  = 0; /*!<0 = Process every frame */
-        obj->aewbConfig.channel_id          = 0; /*!<channel ID */
-
-        status = TI_2A_wrapper_create(&obj->aewbObj, &obj->aewbConfig, aewb_dcc_buf, aewb_dcc_file_size);
-        if(status == VX_FAILURE)
-        {
-            APP_ERROR("Error during 2A create!\n");
-        }
-
-        fclose(aewb_fp);
     }
 
     /* LDC Init */
@@ -366,8 +306,6 @@ static void app_delete_graph(AppObj *obj)
     tiovx_ldc_module_delete(&obj->ldcObj);
     tiovx_viss_module_delete(&obj->vissObj);
     tiovx_multi_scaler_module_delete(&obj->scalerObj);
-
-    TI_2A_wrapper_delete(&obj->aewbObj);
 
     vxReleaseGraph(&obj->graph);
 }
