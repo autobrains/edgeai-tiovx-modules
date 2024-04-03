@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
             status = app_modules_scaler_test(argc, argv);
         }
 
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4) || defined(SOC_J722S)
         else if(status == 0 && strcmp(CHOICES[i], "colorconvert") == 0)
         {
             printf("[Running color convert module test]\n");
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 
         }
 
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4) || defined(SOC_J722S)
 
         else if(status == 0 && strcmp(CHOICES[i], "dof") == 0)
         {
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         }
 #endif
 
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4) || defined(SOC_J722S)
         else if(status == 0 && strcmp(CHOICES[i], "dof-viz") == 0)
         {
             printf("[Running DOF Viz module test]\n");
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
         }
 #endif
 
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4) || defined(SOC_J722S)
         else if(status == 0 && strcmp(CHOICES[i], "sde") == 0)
         {
             printf("[Running SDE module test]\n");
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         }
 #endif
 
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
+#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4) || defined(SOC_J722S)
         else if(status == 0 && strcmp(CHOICES[i], "sde-viz") == 0)
         {
             printf("[Running SDE Viz module test]\n");
