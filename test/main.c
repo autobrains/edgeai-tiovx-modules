@@ -70,8 +70,7 @@
 char *EDGEAI_DATA_PATH;
 char *CHOICES[] = {"multiscaler","colorconvert","dlcolorconvert","mosaic",
                    "dlpreproc", "ldc", "viss", "pyramid", "dof", "dof-viz",
-                   "sde", "sde-viz", "viss-ldc-msc", "preproc-tidl-postproc",
-                   "display", "capture"};
+                   "sde", "sde-viz", "viss-ldc-msc"};
 
 int main(int argc, char *argv[])
 {
@@ -227,38 +226,6 @@ int main(int argc, char *argv[])
             status = app_modules_viss_msc_ldc_test(argc, argv);
 
         }
-
-        else if(status == 0 && strcmp(CHOICES[i], "preproc-tidl-postproc") == 0)
-        {
-            printf("[Running PreProc-TIDL-PostProc module test]\n");
-            int app_modules_dl_pre_proc_tidl_dl_post_proc_test(int argc, char* argv[]);
-
-            status = app_modules_dl_pre_proc_tidl_dl_post_proc_test(argc, argv);
-
-        }
-
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
-        else if(status == 0 && strcmp(CHOICES[i], "display") == 0)
-        {
-            printf("[Running Display module test]\n");
-            int app_modules_display_test(int argc, char* argv[]);
-
-            status = app_modules_display_test(argc, argv);
-
-        }
-#endif
-
-#if defined(SOC_J721E) || defined(SOC_J721S2) || defined(SOC_J784S4)
-        else if(status == 0 && strcmp(CHOICES[i], "capture") == 0)
-        {
-            printf("[Running Capture module test]\n");
-            int app_modules_sensor_capture_test(int argc, char* argv[]);
-
-            status = app_modules_sensor_capture_test(argc, argv);
-
-        }
-#endif
-
     }
 
     printf("All tests complete!\n");
