@@ -113,6 +113,7 @@ typedef struct {
      * SENSOR_ONSEMI_AR0233_UB953_MARS
      * SENSOR_SONY_IMX219_RPI
      * SENSOR_OV2312_UB953_LI
+     * SENSOR_SONY_IMX728
      *
      * */
     vx_char sensor_name[ISS_SENSORS_MAX_NAME];
