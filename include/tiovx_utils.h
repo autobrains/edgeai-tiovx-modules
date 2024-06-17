@@ -67,6 +67,7 @@
 #include <TI/tivx_target_kernel.h>
 #include "tivx_kernels_host_utils.h"
 #include <TI/tivx_img_proc.h>
+#include <TI/hwa_kernels.h>
 
 #include <TI/j7_tidl.h>
 #include <tivx_utils_file_rd_wr.h>
@@ -121,6 +122,8 @@ extern "C" {
 #define APP_ERROR(f_, ...) printf("[ERROR] %d: %s: "f_, __LINE__, __func__, ##__VA_ARGS__)
 
 #define ALIGN_STRIDE64(width) ((((width) + 32)/64)*64)
+
+extern char *EDGEAI_DATA_PATH;
 
 vx_status add_graph_parameter_by_node_index(vx_graph graph, vx_node node, vx_uint32 node_parameter_index);
 

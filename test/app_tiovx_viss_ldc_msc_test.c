@@ -62,15 +62,33 @@
 
 #include <tiovx_utils.h>
 #include "tiovx_sensor_module.h"
+#include "tiovx_viss_module.h"
+#include "tiovx_multi_scaler_module.h"
 #include "tiovx_ldc_module.h"
 
 #define APP_BUFQ_DEPTH   (1)
+#define NUM_ITERATIONS   (1)
 
-#define INPUT_WIDTH  (1936)
-#define INPUT_HEIGHT (1096)
+#define APP_NUM_CH       (1)
+#define APP_NUM_OUTPUTS  (1)
 
-#define OUTPUT_WIDTH  (1920)
-#define OUTPUT_HEIGHT (1080)
+#define VISS_INPUT_WIDTH  1936
+#define VISS_INPUT_HEIGHT 1096
+
+#define VISS_OUTPUT_WIDTH  (VISS_INPUT_WIDTH)
+#define VISS_OUTPUT_HEIGHT (VISS_INPUT_HEIGHT)
+
+#define LDC_INPUT_WIDTH  VISS_OUTPUT_WIDTH
+#define LDC_INPUT_HEIGHT VISS_OUTPUT_HEIGHT
+
+#define LDC_OUTPUT_WIDTH  1920
+#define LDC_OUTPUT_HEIGHT 1080
+
+#define MSC_INPUT_WIDTH  LDC_OUTPUT_WIDTH
+#define MSC_INPUT_HEIGHT LDC_OUTPUT_HEIGHT
+
+#define MSC_OUTPUT_WIDTH  MSC_INPUT_WIDTH/2
+#define MSC_OUTPUT_HEIGHT MSC_INPUT_HEIGHT/2
 
 #define LDC_TABLE_WIDTH     (1920)
 #define LDC_TABLE_HEIGHT    (1080)
@@ -78,7 +96,6 @@
 #define LDC_BLOCK_WIDTH     (64)
 #define LDC_BLOCK_HEIGHT    (32)
 #define LDC_PIXEL_PAD       (1)
-
 
 typedef struct {
 
@@ -88,6 +105,10 @@ typedef struct {
     vx_graph   graph;
 
     SensorObj  sensorObj;
+
+    TIOVXVISSModuleObj  vissObj;
+
+    TIOVXMultiScalerModuleObj  scalerObj;
 
     TIOVXLDCModuleObj  ldcObj;
 
@@ -102,7 +123,7 @@ static vx_status app_verify_graph(AppObj *obj);
 static vx_status app_run_graph(AppObj *obj);
 static void app_delete_graph(AppObj *obj);
 
-vx_status app_modules_ldc_test(vx_int32 argc, vx_char* argv[])
+vx_status app_modules_viss_msc_ldc_test(vx_int32 argc, vx_char* argv[])
 {
     AppObj *obj = &gAppObj;
     vx_status status = VX_SUCCESS;
@@ -115,6 +136,7 @@ vx_status app_modules_ldc_test(vx_int32 argc, vx_char* argv[])
         status = app_create_graph(obj);
         APP_PRINTF("App Create Graph Done! \n");
     }
+
     if(status == VX_SUCCESS)
     {
         status = app_verify_graph(obj);
@@ -148,13 +170,57 @@ static vx_status app_init(AppObj *obj)
         tivxHwaLoadKernels(obj->context);
     }
 
+    /* VISS Init */
     if(status == VX_SUCCESS)
     {
-        TIOVXLDCModuleObj *ldcObj = &obj->ldcObj;
+        TIOVXVISSModuleObj *vissObj = &obj->vissObj;
 
         SensorObj *sensorObj = &obj->sensorObj;
         tiovx_querry_sensor(sensorObj);
         tiovx_init_sensor(sensorObj,"SENSOR_SONY_IMX390_UB953_D3");
+
+        tivx_vpac_viss_params_init(&vissObj->params);
+
+        snprintf(vissObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx390/linear/dcc_viss.bin");
+
+        vissObj->input.bufq_depth = APP_BUFQ_DEPTH;
+
+        vissObj->input.params.width  = VISS_INPUT_WIDTH;
+        vissObj->input.params.height = VISS_INPUT_HEIGHT;
+        vissObj->input.params.num_exposures = 1;
+        vissObj->input.params.line_interleaved = vx_false_e;
+        vissObj->input.params.meta_height_before = 0;
+        vissObj->input.params.meta_height_after = 0;
+        vissObj->input.params.format[0].pixel_container = TIVX_RAW_IMAGE_16_BIT;
+        vissObj->input.params.format[0].msb = 11;
+
+        vissObj->ae_awb_result_bufq_depth = APP_BUFQ_DEPTH;
+
+        /* Enable NV12 output from VISS which can be tapped from output mux 2*/
+        vissObj->output_select[0] = TIOVX_VISS_MODULE_OUTPUT_NA;
+        vissObj->output_select[1] = TIOVX_VISS_MODULE_OUTPUT_NA;
+        vissObj->output_select[2] = TIOVX_VISS_MODULE_OUTPUT_EN;
+        vissObj->output_select[3] = TIOVX_VISS_MODULE_OUTPUT_NA;
+        vissObj->output_select[4] = TIOVX_VISS_MODULE_OUTPUT_NA;
+
+        /* As we are selecting output2, specify output2 image properties */
+        vissObj->output2.bufq_depth   = APP_BUFQ_DEPTH;
+        vissObj->output2.color_format = VX_DF_IMAGE_NV12;
+        vissObj->output2.width        = VISS_OUTPUT_WIDTH;
+        vissObj->output2.height       = VISS_OUTPUT_HEIGHT;
+
+        vissObj->h3a_stats_bufq_depth = APP_BUFQ_DEPTH;
+
+        /* Initialize modules */
+        status = tiovx_viss_module_init(obj->context, vissObj, sensorObj);
+        APP_PRINTF("VISS Init Done! \n");
+    }
+
+    /* LDC Init */
+    if(status == VX_SUCCESS)
+    {
+        TIOVXLDCModuleObj *ldcObj = &obj->ldcObj;
+        SensorObj *sensorObj = &obj->sensorObj;
 
         snprintf(ldcObj->dcc_config_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s", "/opt/imaging/imx390/wdr/dcc_ldc_wdr.bin");
         snprintf(ldcObj->lut_file_path, TIVX_FILEIO_FILE_PATH_LENGTH, "%s/raw_images/modules_test/imx390_ldc_lut_1920x1080.bin", EDGEAI_DATA_PATH);
@@ -165,13 +231,13 @@ static vx_status app_init(AppObj *obj)
 
         ldcObj->input.bufq_depth = APP_BUFQ_DEPTH;
         ldcObj->input.color_format = VX_DF_IMAGE_NV12;
-        ldcObj->input.width = INPUT_WIDTH;
-        ldcObj->input.height = INPUT_HEIGHT;
+        ldcObj->input.width = LDC_INPUT_WIDTH;
+        ldcObj->input.height = LDC_INPUT_HEIGHT;
 
         ldcObj->output0.bufq_depth = APP_BUFQ_DEPTH;
         ldcObj->output0.color_format = VX_DF_IMAGE_NV12;
-        ldcObj->output0.width = OUTPUT_WIDTH;
-        ldcObj->output0.height = OUTPUT_HEIGHT;
+        ldcObj->output0.width = LDC_OUTPUT_WIDTH;
+        ldcObj->output0.height = LDC_OUTPUT_HEIGHT;
 
         ldcObj->init_x = 0;
         ldcObj->init_y = 0;
@@ -187,6 +253,38 @@ static vx_status app_init(AppObj *obj)
         APP_PRINTF("LDC Init Done! \n");
     }
 
+    /* MSC Init */
+    if(status == VX_SUCCESS)
+    {
+        TIOVXMultiScalerModuleObj *scalerObj = &obj->scalerObj;
+        vx_int32 out;
+
+        scalerObj->num_channels = APP_NUM_CH;
+        scalerObj->num_outputs = APP_NUM_OUTPUTS;
+        scalerObj->input.bufq_depth = APP_BUFQ_DEPTH;
+        for(out = 0; out < APP_NUM_OUTPUTS; out++)
+        {
+            scalerObj->output[out].bufq_depth = APP_BUFQ_DEPTH;
+        }
+        scalerObj->interpolation_method = VX_INTERPOLATION_BILINEAR;
+        scalerObj->color_format = VX_DF_IMAGE_NV12;
+
+        scalerObj->input.width = MSC_INPUT_WIDTH;
+        scalerObj->input.height = MSC_INPUT_HEIGHT;
+
+        for(out = 0; out < APP_NUM_OUTPUTS; out++)
+        {
+            scalerObj->output[out].width = MSC_OUTPUT_WIDTH;
+            scalerObj->output[out].height = MSC_OUTPUT_HEIGHT;
+        }
+
+        tiovx_multi_scaler_module_crop_params_init(scalerObj);
+
+        /* Initialize modules */
+        status = tiovx_multi_scaler_module_init(obj->context, scalerObj);
+        APP_PRINTF("Scaler Init Done! \n");
+    }
+
     return status;
 }
 
@@ -195,6 +293,8 @@ static void app_deinit(AppObj *obj)
     tiovx_deinit_sensor(&obj->sensorObj);
 
     tiovx_ldc_module_deinit(&obj->ldcObj);
+    tiovx_viss_module_deinit(&obj->vissObj);
+    tiovx_multi_scaler_module_deinit(&obj->scalerObj);
 
     tivxHwaUnLoadKernels(obj->context);
 
@@ -204,6 +304,8 @@ static void app_deinit(AppObj *obj)
 static void app_delete_graph(AppObj *obj)
 {
     tiovx_ldc_module_delete(&obj->ldcObj);
+    tiovx_viss_module_delete(&obj->vissObj);
+    tiovx_multi_scaler_module_delete(&obj->scalerObj);
 
     vxReleaseGraph(&obj->graph);
 }
@@ -220,30 +322,42 @@ static vx_status app_create_graph(AppObj *obj)
 
     if((vx_status)VX_SUCCESS == status)
     {
-        status = tiovx_ldc_module_create(obj->graph, &obj->ldcObj, NULL, TIVX_TARGET_VPAC_LDC1);
+        status = tiovx_viss_module_create(obj->graph, &obj->vissObj, NULL, NULL, TIVX_TARGET_VPAC_VISS1);
+        status = tiovx_ldc_module_create(obj->graph, &obj->ldcObj, obj->vissObj.output2.arr[0], TIVX_TARGET_VPAC_LDC1);
+        status = tiovx_multi_scaler_module_create(obj->graph, &obj->scalerObj, obj->ldcObj.output0.arr[0], TIVX_TARGET_VPAC_MSC1);
     }
 
     graph_parameter_index = 0;
+
     if((vx_status)VX_SUCCESS == status)
     {
+        status = add_graph_parameter_by_node_index(obj->graph, obj->vissObj.node, 1);
 
-        status = add_graph_parameter_by_node_index(obj->graph, obj->ldcObj.node, 6);
-
-        obj->ldcObj.input.graph_parameter_index = graph_parameter_index;
+        obj->vissObj.ae_awb_result_graph_parameter_index = graph_parameter_index;
         graph_parameters_queue_params_list[graph_parameter_index].graph_parameter_index = graph_parameter_index;
         graph_parameters_queue_params_list[graph_parameter_index].refs_list_size = APP_BUFQ_DEPTH;
-        graph_parameters_queue_params_list[graph_parameter_index].refs_list = (vx_reference*)&obj->ldcObj.input.image_handle[0];
+        graph_parameters_queue_params_list[graph_parameter_index].refs_list = (vx_reference*)&obj->vissObj.ae_awb_result_handle[0];
         graph_parameter_index++;
     }
 
     if((vx_status)VX_SUCCESS == status)
     {
-        status = add_graph_parameter_by_node_index(obj->graph, obj->ldcObj.node, 7);
+        status = add_graph_parameter_by_node_index(obj->graph, obj->vissObj.node, 3);
 
-        obj->ldcObj.output0.graph_parameter_index = graph_parameter_index;
+        obj->vissObj.input.graph_parameter_index = graph_parameter_index;
         graph_parameters_queue_params_list[graph_parameter_index].graph_parameter_index = graph_parameter_index;
         graph_parameters_queue_params_list[graph_parameter_index].refs_list_size = APP_BUFQ_DEPTH;
-        graph_parameters_queue_params_list[graph_parameter_index].refs_list = (vx_reference*)&obj->ldcObj.output0.image_handle[0];
+        graph_parameters_queue_params_list[graph_parameter_index].refs_list = (vx_reference*)&obj->vissObj.input.image_handle[0];
+        graph_parameter_index++;
+    }
+
+    if((vx_status)VX_SUCCESS == status)
+    {
+        status = add_graph_parameter_by_node_index(obj->graph, obj->scalerObj.node, 1);
+        obj->scalerObj.output[0].graph_parameter_index = graph_parameter_index;
+        graph_parameters_queue_params_list[graph_parameter_index].graph_parameter_index = graph_parameter_index;
+        graph_parameters_queue_params_list[graph_parameter_index].refs_list_size = APP_BUFQ_DEPTH;
+        graph_parameters_queue_params_list[graph_parameter_index].refs_list = (vx_reference*)&obj->scalerObj.output[0].image_handle[0];
         graph_parameter_index++;
     }
 
@@ -266,11 +380,6 @@ static vx_status app_verify_graph(AppObj *obj)
 
     APP_PRINTF("App Verify Graph Done!\n");
 
-    if((vx_status)VX_SUCCESS == status)
-    {
-        status = tiovx_ldc_module_release_buffers(&obj->ldcObj);
-    }
-
     return status;
 }
 
@@ -281,57 +390,52 @@ static vx_status app_run_graph(AppObj *obj)
     char input_filename[100];
     char output_filename[100];
 
-    sprintf(input_filename, "%s/raw_images/modules_test/imx390_fisheye_1936x1096_nv12.yuv", EDGEAI_DATA_PATH);
-    sprintf(output_filename, "%s/output/imx390_rectified_1920x1080_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(input_filename, "%s/raw_images/modules_test/imx390_raw_image_1936x1096_16bpp_exp0.raw", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/imx390_960x540_capture_nv12.yuv", EDGEAI_DATA_PATH);
 
-    vx_image input_o, output_o;
+    tivx_raw_image input_o;
+    vx_user_data_object aewb_o;
+    vx_image output_o;
 
-    TIOVXLDCModuleObj *ldcObj = &obj->ldcObj;
-    vx_int32 bufq;
+    TIOVXVISSModuleObj *vissObj = &obj->vissObj;
+    TIOVXMultiScalerModuleObj *scalerObj = &obj->scalerObj;
+
     uint32_t num_refs;
+    int32_t frame_count;
 
-    void *inAddr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
-    void *outAddr[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES] = {NULL};
+    frame_count = 0;
+    while (frame_count < NUM_ITERATIONS)
+    {
+        APP_PRINTF("Running frame %d\n", frame_count);
+        readRawImage(input_filename, vissObj->input.image_handle[0]);
 
-    vx_uint32 inSizes[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES];
-    vx_uint32 outSizes[APP_BUFQ_DEPTH][TIOVX_MODULES_MAX_REF_HANDLES];
+        APP_PRINTF("Enqueueing input raw buffers!\n");
+        vxGraphParameterEnqueueReadyRef(obj->graph, vissObj->input.graph_parameter_index, (vx_reference*)&vissObj->input.image_handle[0], 1);
 
-    allocate_image_buffers(&ldcObj->input, inAddr, inSizes);
-    allocate_image_buffers(&ldcObj->output0, outAddr, outSizes);
+        APP_PRINTF("Enqueueing ae-awb buffers!\n");
+        vxGraphParameterEnqueueReadyRef(obj->graph, vissObj->ae_awb_result_graph_parameter_index, (vx_reference*)&vissObj->ae_awb_result_handle[0], 1);
 
-    bufq = 0;
+        APP_PRINTF("Enqueueing output image buffers!\n");
+        vxGraphParameterEnqueueReadyRef(obj->graph, scalerObj->output[0].graph_parameter_index, (vx_reference*)&scalerObj->output[0].image_handle[0], 1);
 
-    assign_image_buffers(&ldcObj->input, inAddr[bufq], inSizes[bufq], bufq);
-    assign_image_buffers(&ldcObj->output0, outAddr[bufq], outSizes[bufq], bufq);
+        APP_PRINTF("Processing!\n");
+        status = vxScheduleGraph(obj->graph);
+        if((vx_status)VX_SUCCESS != status) {
+            APP_ERROR("Schedule Graph failed: %d!\n", status);
+        }
+        status = vxWaitGraph(obj->graph);
+        if((vx_status)VX_SUCCESS != status) {
+            APP_ERROR("Wait Graph failed: %d!\n", status);
+        }
 
-    readImage(input_filename, ldcObj->input.image_handle[0]);
+        vxGraphParameterDequeueDoneRef(obj->graph, vissObj->input.graph_parameter_index, (vx_reference*)&input_o, 1, &num_refs);
+        vxGraphParameterDequeueDoneRef(obj->graph, scalerObj->output[0].graph_parameter_index, (vx_reference*)&output_o, 1, &num_refs);
+        vxGraphParameterDequeueDoneRef(obj->graph, vissObj->ae_awb_result_graph_parameter_index, (vx_reference*)&aewb_o, 1, &num_refs);
 
-    APP_PRINTF("Enqueueing input buffers!\n");
-    vxGraphParameterEnqueueReadyRef(obj->graph, 0, (vx_reference*)&ldcObj->input.image_handle[0], 1);
-    APP_PRINTF("Enqueueing output buffers!\n");
-    vxGraphParameterEnqueueReadyRef(obj->graph, 1, (vx_reference*)&ldcObj->output0.image_handle[0], 1);
+        writeImage(output_filename, scalerObj->output[0].image_handle[0]);
 
-    APP_PRINTF("Processing!\n");
-    status = vxScheduleGraph(obj->graph);
-    if((vx_status)VX_SUCCESS != status) {
-      APP_ERROR("Schedule Graph failed: %d!\n", status);
+        frame_count++;
     }
-    status = vxWaitGraph(obj->graph);
-    if((vx_status)VX_SUCCESS != status) {
-      APP_ERROR("Wait Graph failed: %d!\n", status);
-    }
-
-    vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);
-    vxGraphParameterDequeueDoneRef(obj->graph, 1, (vx_reference*)&output_o, 1, &num_refs);
-
-    writeImage(output_filename, ldcObj->output0.image_handle[0]);
-
-    release_image_buffers(&ldcObj->input, inAddr[bufq], inSizes[bufq], bufq);
-    release_image_buffers(&ldcObj->output0, outAddr[bufq], outSizes[bufq], bufq);
-
-    delete_image_buffers(&ldcObj->input, inAddr, inSizes);
-    delete_image_buffers(&ldcObj->output0, outAddr, outSizes);
 
     return status;
 }
-

@@ -288,9 +288,13 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename_template = "/opt/edgeai-tiovx-modules/data/input/avp3_1280x720_0_pyramid_level_%d_u8.gray";
-    char * input_ref_filename_template = "/opt/edgeai-tiovx-modules/data/input/avp3_1280x720_1_pyramid_level_%d_u8.gray";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/output_dof_u32.raw";
+    char input_filename_template[100];
+    char input_ref_filename_template[100];
+    char output_filename[100];
+
+    sprintf(input_filename_template, "%s/raw_images/modules_test/avp3_1280x720_0_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
+    sprintf(input_ref_filename_template, "%s/raw_images/modules_test/avp3_1280x720_1_pyramid_level_%%d_u8.gray", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/output_dof_u32.raw", EDGEAI_DATA_PATH);
 
     vx_pyramid  input_o, input_ref_o;
     vx_image output_flow_vector_o;
@@ -344,11 +348,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);

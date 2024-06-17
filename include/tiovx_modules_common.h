@@ -66,6 +66,7 @@
 #include <TI/tivx_task.h>
 #include <TI/tivx_target_kernel.h>
 #include <TI/tivx_img_proc.h>
+#include <edgeai_tiovx_img_proc.h>
 
 #include <TI/j7_tidl.h>
 #include <TI/tivx_fileio.h>
@@ -136,7 +137,7 @@ typedef struct {
     vx_tensor tensor_handle[TIOVX_MODULES_MAX_BUFQ_DEPTH];
 
     vx_int32 num_dims;
-    vx_int32 dim_sizes[VX_TENSOR_NUMBER_OF_DIMS];
+    vx_int32 dim_sizes[TIVX_CONTEXT_MAX_TENSOR_DIMS];
     vx_int32 datatype;
 
     vx_int32 graph_parameter_index;
@@ -171,6 +172,42 @@ typedef struct {
     vx_int32 bufq_depth;
 
 } DstObj;
+
+static inline vx_enum get_vx_tensor_datatype(int32_t tidl_datatype)
+{
+    vx_enum tiovx_datatype = VX_TYPE_INVALID;
+
+    if(tidl_datatype == TIDL_UnsignedChar)
+    {
+        tiovx_datatype = VX_TYPE_UINT8;
+    }
+    else if(tidl_datatype == TIDL_SignedChar)
+    {
+        tiovx_datatype = VX_TYPE_INT8;
+    }
+    else if(tidl_datatype == TIDL_UnsignedShort)
+    {
+        tiovx_datatype = VX_TYPE_UINT16;
+    }
+    else if(tidl_datatype == TIDL_SignedShort)
+    {
+        tiovx_datatype = VX_TYPE_INT16;
+    }
+    else if(tidl_datatype == TIDL_UnsignedWord)
+    {
+        tiovx_datatype = VX_TYPE_UINT32;
+    }
+    else if(tidl_datatype == TIDL_SignedWord)
+    {
+        tiovx_datatype = VX_TYPE_INT32;
+    }
+    else if(tidl_datatype == TIDL_SinglePrecFloat)
+    {
+        tiovx_datatype = VX_TYPE_FLOAT32;
+    }
+
+    return (tiovx_datatype);
+}
 
 #ifdef __cplusplus
 }

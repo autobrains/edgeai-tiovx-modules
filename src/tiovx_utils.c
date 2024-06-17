@@ -154,6 +154,12 @@ vx_status assign_single_raw_image_buffer(tivx_raw_image image, void *virtAddr[],
         vx_int32 bufsize[4];
         vx_int32 p;
 
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
+
         for(p = 0; p < num_planes; p++)
         {
             addr[p] = virtAddr[p];
@@ -178,6 +184,12 @@ vx_status release_single_raw_image_buffer(tivx_raw_image image, void *virtAddr[]
         void * addr[4];
         vx_int32 bufsize[4];
         vx_int32 p;
+
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
 
         for(p = 0; p < num_planes; p++)
         {
@@ -424,6 +436,12 @@ vx_status allocate_single_image_buffer(vx_image image, void *virtAddr[], vx_uint
                                             TIOVX_MODULES_MAX_REF_HANDLES,
                                             &num_planes);
 
+        if(num_planes > 4)
+        {
+            APP_ERROR("Number of planes can not be greater than 4. \n");
+            return VX_FAILURE;
+        }
+
         if((vx_status)VX_SUCCESS == status)
         {
             vx_int32 p;
@@ -491,7 +509,7 @@ vx_status assign_single_image_buffer(vx_image image, void *virtAddr[], vx_uint32
         status = tivxReferenceImportHandle((vx_reference)image,
                                         (const void **)addr,
                                         (const uint32_t *)bufsize,
-                                        num_planes);
+                                        1);
     }
 
     return status;
@@ -518,7 +536,7 @@ vx_status release_single_image_buffer(vx_image image, void *virtAddr[], vx_uint3
         status = tivxReferenceImportHandle((vx_reference)image,
                                             (const void **)addr,
                                             (const uint32_t *)bufsize,
-                                            num_planes);
+                                            1);
     }
 
     return status;
@@ -568,7 +586,7 @@ vx_status allocate_image_buffers(ImgObj *imgObj, void *virtAddr[][TIOVX_MODULES_
 
                 if((vx_status)VX_SUCCESS != status)
                 {
-                    APP_PRINTF("Unable to allocate single image buffer!\n");
+                    APP_ERROR("Unable to allocate single image buffer!\n");
                     break;
                 }
             }
@@ -616,7 +634,7 @@ vx_status delete_image_buffers(ImgObj *imgObj, void *virtAddr[][TIOVX_MODULES_MA
 
                 if((vx_status)VX_SUCCESS != status)
                 {
-                    APP_PRINTF("Unable to delete single image buffer!\n");
+                    APP_ERROR("Unable to delete single image buffer!\n");
                     break;
                 }
             }
@@ -660,7 +678,7 @@ vx_status assign_image_buffers(ImgObj *imgObj, void *virtAddr[], vx_uint32 sizes
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single image buffer!\n");
+            APP_ERROR("Unable to assign single image buffer!\n");
             break;
         }
 
@@ -701,7 +719,7 @@ vx_status release_image_buffers(ImgObj *imgObj, void *virtAddr[], vx_uint32 size
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single image buffer!\n");
+            APP_ERROR("Unable to assign single image buffer!\n");
             break;
         }
 
@@ -910,7 +928,7 @@ vx_status delete_tensor_buffers(TensorObj *tensorObj, void *virtAddr[][TIOVX_MOD
 
                 if((vx_status)VX_SUCCESS != status)
                 {
-                    APP_PRINTF("Unable to delete single tensor buffer!\n");
+                    APP_ERROR("Unable to delete single tensor buffer!\n");
                     break;
                 }
             }
@@ -946,7 +964,7 @@ vx_status assign_tensor_buffers(TensorObj *tensorObj, void *virtAddr[], vx_uint3
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single tensor buffer!\n");
+            APP_ERROR("Unable to assign single tensor buffer!\n");
             break;
         }
 
@@ -981,7 +999,7 @@ vx_status release_tensor_buffers(TensorObj *tensorObj, void *virtAddr[], vx_uint
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single tensor buffer!\n");
+            APP_ERROR("Unable to assign single tensor buffer!\n");
             break;
         }
 
@@ -1892,7 +1910,7 @@ vx_status delete_user_data_buffers(vx_object_array obj_arr[], void *virtAddr[][T
 
                 if((vx_status)VX_SUCCESS != status)
                 {
-                    APP_PRINTF("Unable to delete single user data buffer!\n");
+                    APP_ERROR("Unable to delete single user data buffer!\n");
                     break;
                 }
             }
@@ -1928,7 +1946,7 @@ vx_status assign_user_data_buffers(vx_object_array obj_arr[], void *virtAddr[], 
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single user data buffer!\n");
+            APP_ERROR("Unable to assign single user data buffer!\n");
             break;
         }
 
@@ -1963,7 +1981,7 @@ vx_status release_user_data_buffers(vx_object_array obj_arr[], void *virtAddr[],
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single user data buffer!\n");
+            APP_ERROR("Unable to release single user data buffer!\n");
             break;
         }
 
@@ -2014,7 +2032,7 @@ vx_status allocate_pyramid_buffers(PyramidObj *pyramidObj, void *virtAddr[][TIOV
 
                 if((vx_status)VX_SUCCESS != status)
                 {
-                    APP_PRINTF("Unable to allocate single pyramid buffer!\n");
+                    APP_ERROR("Unable to allocate single pyramid buffer!\n");
                     break;
                 }
             }
@@ -2102,7 +2120,7 @@ vx_status assign_pyramid_buffers(PyramidObj *pyramidObj, void *virtAddr[], vx_ui
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to assign single pyramid buffer!\n");
+            APP_ERROR("Unable to assign single pyramid buffer!\n");
             break;
         }
 
@@ -2169,7 +2187,7 @@ vx_status release_pyramid_buffers(PyramidObj *pyramidObj, void *virtAddr[], vx_u
 
         if((vx_status)VX_SUCCESS != status)
         {
-            APP_PRINTF("Unable to release single pyramid buffer!\n");
+            APP_ERROR("Unable to release single pyramid buffer!\n");
             break;
         }
 
@@ -2247,13 +2265,13 @@ vx_status delete_pyramid_buffers(PyramidObj *pyramidObj, void *virtAddr[][TIOVX_
 
             if((vx_status)VX_SUCCESS != status)
             {
-                APP_PRINTF("Unable to delete single pyramid buffer!\n");
+                APP_ERROR("Unable to delete single pyramid buffer!\n");
                 break;
             }
 
             for(l = 0; l < num_planes; l++)
             {
-                APP_PRINTF("virtAddr[%d][%d] = 0x%016lx, size = %d\n", bufq, l, (unsigned long int)virtAddr[ctr + l], sizes[ctr + l]);
+                APP_PRINTF("virtAddr[%d][%d] = 0x%016lx, size = %ls\n", bufq, l, (unsigned long int)virtAddr[ctr + l], sizes[ctr + l]);
             }
 
             ctr += num_planes;

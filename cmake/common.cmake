@@ -14,9 +14,12 @@ message(STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE} PROJECT_NAME = ${PROJECT_
 SET(CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".a" ".lib" ".so")
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+if(NOT CMAKE_OUTPUT_DIR)
+    set(CMAKE_OUTPUT_DIR ${CMAKE_SOURCE_DIR})
+endif()
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_OUTPUT_DIR}/bin/${CMAKE_BUILD_TYPE})
 set(CMAKE_INSTALL_LIBDIR           lib)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -28,26 +31,31 @@ if (NOT DEFINED ENV{SOC})
 endif()
 
 set(TARGET_SOC_LOWER $ENV{SOC})
+set(TARGET_OS        $ENV{TARGET_OS})
+
+if ("${TARGET_OS}" STREQUAL "")
+    set(TARGET_OS           LINUX)
+endif()
 
 if ("${TARGET_SOC_LOWER}" STREQUAL "j721e")
     set(TARGET_PLATFORM     J7)
     set(TARGET_CPU          A72)
-    set(TARGET_OS           LINUX)
     set(TARGET_SOC          J721E)
 elseif ("${TARGET_SOC_LOWER}" STREQUAL "j721s2")
     set(TARGET_PLATFORM     J7)
     set(TARGET_CPU          A72)
-    set(TARGET_OS           LINUX)
     set(TARGET_SOC          J721S2)
 elseif ("${TARGET_SOC_LOWER}" STREQUAL "j784s4")
     set(TARGET_PLATFORM     J7)
     set(TARGET_CPU          A72)
-    set(TARGET_OS           LINUX)
     set(TARGET_SOC          J784S4)
+elseif ("${TARGET_SOC_LOWER}" STREQUAL "j722s")
+    set(TARGET_PLATFORM     J7)
+    set(TARGET_CPU          A53)
+    set(TARGET_SOC          J722S)
 elseif ("${TARGET_SOC_LOWER}" STREQUAL "am62a")
     set(TARGET_PLATFORM     SITARA)
     set(TARGET_CPU          A53)
-    set(TARGET_OS           LINUX)
     set(TARGET_SOC          AM62A)
 else()
     message(FATAL_ERROR "SOC ${TARGET_SOC_LOWER} is not supported.")
@@ -56,48 +64,73 @@ endif()
 message("SOC=${TARGET_SOC_LOWER}")
 
 add_definitions(
-    -DTARGET_CPU=${TARGET_CPU}
-    -DTARGET_OS=${TARGET_OS}
+    -DTARGET_CPU_${TARGET_CPU}
+    -DTARGET_OS_${TARGET_OS}
     -DSOC_${TARGET_SOC}
 )
 
+set(VISION_APPS_LIBS_PATH $ENV{VISION_APPS_LIBS_PATH})
+set(EDGEAI_LIBS_PATH $ENV{EDGEAI_LIBS_PATH})
 link_directories(${TARGET_FS}/usr/lib/aarch64-linux
                  ${TARGET_FS}/usr/lib
+                 ${CMAKE_LIBRARY_PATH}/usr/lib
+                 ${CMAKE_LIBRARY_PATH}/lib
+                 ${VISION_APPS_LIBS_PATH}
+                 ${EDGEAI_LIBS_PATH}
                  )
 
 #message("PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}")
 #message("CMAKE_SOURCE_DIR   = ${CMAKE_SOURCE_DIR}")
 
+set(PSDK_INCLUDE_PATH $ENV{PSDK_INCLUDE_PATH})
+if ("${PSDK_INCLUDE_PATH}" STREQUAL "")
+    set(PSDK_INCLUDE_PATH ${TARGET_FS}/usr/include/)
+endif()
+
 include_directories(${PROJECT_SOURCE_DIR}
                     ${PROJECT_SOURCE_DIR}/include
-                    ${TARGET_FS}/usr/local/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/rtos/common
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/rtos/common_linux
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/platform/${TARGET_SOC_LOWER}/linux
-                    ${TARGET_FS}/usr/include/processor_sdk/ivision
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging
-                    ${TARGET_FS}/usr/include/processor_sdk/ti-perception-toolkit/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/algos/ae/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/algos/awb/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/algos/dcc/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/sensor_drv/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/ti_2a_wrapper/include
-                    ${TARGET_FS}/usr/include/processor_sdk/imaging/kernels/include
-                    ${TARGET_FS}/usr/include/processor_sdk/tidl_j7/ti_dl/inc
-                    ${TARGET_FS}/usr/include/processor_sdk/tiovx/include
-                    ${TARGET_FS}/usr/include/processor_sdk/tiovx/kernels/include
-                    ${TARGET_FS}/usr/include/processor_sdk/tiovx/kernels_j7/include
-                    ${TARGET_FS}/usr/include/processor_sdk/tiovx/utils/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/utils/app_init/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/kernels/img_proc/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/kernels/fileio/include
-                    ${TARGET_FS}/usr/include/processor_sdk/vision_apps/kernels/stereo/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/ivision
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/ti-perception-toolkit/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/algos/ae/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/algos/awb/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/algos/dcc/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/sensor_drv/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/ti_2a_wrapper/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/kernels/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/imaging/utils/itt_server/include/
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tidl_j7/arm-tidl/rt/inc/
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tidl_j7/arm-tidl/tiovx_kernels/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tiovx/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tiovx/kernels/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tiovx/kernels_j7/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/tiovx/utils/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/vision_apps
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/vision_apps/utils/app_init/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/vision_apps/kernels/img_proc/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/vision_apps/kernels/fileio/include
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/vision_apps/kernels/stereo/include
+                    ${PSDK_INCLUDE_PATH}/edgeai-tiovx-kernels
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/app_utils/
+                    ${PSDK_INCLUDE_PATH}/processor_sdk/video_io/kernels/include/
                    )
 
 set(SYSTEM_LINK_LIBS
     tivision_apps
+    edgeai-tiovx-kernels
+    edgeai-apps-utils
     )
+
+if ("${TARGET_OS}" STREQUAL "QNX")
+    list(APPEND
+         SYSTEM_LINK_LIBS
+         sharedmemallocator
+         tiudma-usr
+         tiipc-usr
+         ti-udmalld
+         ti-pdk
+         ti-sciclient)
+endif()
 
 set(COMMON_LINK_LIBS
     edgeai-tiovx-modules
@@ -116,19 +149,11 @@ function(build_app app_name)
                          )
 
     set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
-    set(BINS ${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}/${app_name})
-
-    set(TEST_DATA_INSTALL_DIR /opt/${PROJECT_NAME}/data/input)
-    FILE(GLOB TEST_DATA ${CMAKE_CURRENT_SOURCE_DIR}/../data/input/*)
+    set(BINS ${CMAKE_OUTPUT_DIR}/bin/${CMAKE_BUILD_TYPE}/${app_name})
 
     install(FILES ${BINS}
             PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
             DESTINATION ${BIN_INSTALL_DIR})
-
-    install(FILES ${TEST_DATA}
-            DESTINATION ${TEST_DATA_INSTALL_DIR})
-
-    install(DIRECTORY DESTINATION ${TEST_DATA_INSTALL_DIR}/../output)
 
 endfunction()
 

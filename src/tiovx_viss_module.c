@@ -61,6 +61,7 @@
  */
 
 #include "tiovx_viss_module.h"
+#include <itt_server.h>
 
 static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVISSModuleObj *obj)
 {
@@ -70,12 +71,11 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
 
     obj->params.sensor_dcc_id       = sensorObj->sensorParams.dccId;
     obj->params.use_case            = 0;
-    obj->params.fcp[0].ee_mode      = TIVX_VPAC_VISS_EE_MODE_OFF;
     obj->params.fcp[0].chroma_mode  = TIVX_VPAC_VISS_CHROMA_MODE_420;
 
     if(obj->output_select[0] == TIOVX_VISS_MODULE_OUTPUT_EN)
     {
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         if(obj->params.enable_ir_op)
         {
             if(obj->output0.color_format == VX_DF_IMAGE_U8)
@@ -110,7 +110,7 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
         {
             obj->params.fcp[0].mux_output2  = TIVX_VPAC_VISS_MUX2_YUV422;
         }
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
         else if((obj->output2.color_format == VX_DF_IMAGE_U16) &&
                 (obj->params.enable_ir_op))
         {
@@ -127,7 +127,7 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
         obj->params.fcp[0].mux_output4  = 0;
     }
 
-#if defined(SOC_AM62A)
+#if defined(SOC_AM62A) || defined(SOC_J722S)
     if(obj->params.bypass_pcid)
         obj->params.enable_ir_op = TIVX_VPAC_VISS_IR_DISABLE;
 
@@ -141,7 +141,6 @@ static vx_status tiovx_viss_module_configure_params(vx_context context, TIOVXVIS
     obj->params.h3a_in              = TIVX_VPAC_VISS_H3A_IN_LSC;  
 #endif
     obj->params.h3a_aewb_af_mode    = TIVX_VPAC_VISS_H3A_MODE_AEWB;
-    obj->params.bypass_nsf4         = 0;
     obj->params.enable_ctx          = 1;
 
     if(sensorObj->sensor_wdr_enabled == 1)
@@ -220,6 +219,11 @@ static vx_status tiovx_viss_module_configure_dcc_params(vx_context context, TIOV
         }
     }
 
+    if(fp != NULL)
+    {
+        fclose(fp);
+    }
+
     return status;
 }
 
@@ -259,6 +263,17 @@ static vx_status tiovx_viss_module_create_inputs(vx_context context, TIOVXVISSMo
                 break;
             }
             obj->ae_awb_result_handle[buf] = (vx_user_data_object)vxGetObjectArrayItem((vx_object_array)obj->ae_awb_result_arr[buf], 0);
+
+            for (int i=0; i < sensorObj->num_cameras_enabled; i++) {
+                void *map_ptr;
+                vx_map_id map_id;
+                vx_user_data_object ae_awb_result_obj = NULL;
+
+                ae_awb_result_obj = (vx_user_data_object)vxGetObjectArrayItem((vx_object_array)obj->ae_awb_result_arr[buf], i);
+                vxMapUserDataObject(ae_awb_result_obj, 0, sizeof(tivx_ae_awb_params_t), &map_id, &map_ptr, VX_READ_ONLY, VX_MEMORY_TYPE_HOST, 0);
+                vxUnmapUserDataObject(ae_awb_result_obj, map_id);
+                vxReleaseReference((vx_reference *)&ae_awb_result_obj);
+            }
         }
         vxReleaseUserDataObject(&ae_awb_result);
     }
@@ -689,7 +704,10 @@ vx_status tiovx_viss_module_deinit(TIOVXVISSModuleObj *obj)
             if((vx_status)VX_SUCCESS == status)
             {
                 TIOVX_MODULE_PRINTF("[VISS-MODULE] Releasing ae-awb result arr!\n");
-                status = vxReleaseObjectArray(&obj->ae_awb_result_arr[buf]);
+                if(obj->ae_awb_result_arr[buf] != NULL)
+                {
+                    status = vxReleaseObjectArray(&obj->ae_awb_result_arr[buf]);
+                }
             }
         }
     }
@@ -896,7 +914,14 @@ vx_status tiovx_viss_module_create(vx_graph graph, TIOVXVISSModuleObj *obj, vx_o
     }
     else
     {
-        ae_awb_result = (vx_user_data_object)vxGetObjectArrayItem(obj->ae_awb_result_arr[0], 0);
+        if(obj->ae_awb_result_arr[0] == NULL)
+        {
+            ae_awb_result = NULL;
+        }
+        else
+        {
+            ae_awb_result = (vx_user_data_object)vxGetObjectArrayItem(obj->ae_awb_result_arr[0], 0);
+        }
     }
 
     h3a_stats = (vx_user_data_object)vxGetObjectArrayItem(obj->h3a_stats_arr[0], 0);
@@ -985,7 +1010,10 @@ vx_status tiovx_viss_module_create(vx_graph graph, TIOVXVISSModuleObj *obj, vx_o
     }
 
     tivxReleaseRawImage(&raw_image);
-    vxReleaseUserDataObject(&ae_awb_result);
+    if(ae_awb_result != NULL)
+    {
+        vxReleaseUserDataObject(&ae_awb_result);
+    }
     vxReleaseUserDataObject(&h3a_stats);
 
     if(obj->output_select[0] == TIOVX_VISS_MODULE_OUTPUT_EN)
@@ -1467,7 +1495,7 @@ vx_status tiovx_viss_module_add_write_output_node(vx_graph graph, TIOVXVISSModul
     status = vxGetStatus((vx_reference)obj->img_write_node);
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(obj->img_write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(obj->img_write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, obj->img_write_node, replicate, 3);
@@ -1487,7 +1515,7 @@ vx_status tiovx_viss_module_add_write_output_node(vx_graph graph, TIOVXVISSModul
         status = vxGetStatus((vx_reference)obj->h3a_write_node);
         if((vx_status)VX_SUCCESS == status)
         {
-            vxSetNodeTarget(obj->h3a_write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+            vxSetNodeTarget(obj->h3a_write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
             vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
             vxReplicateNode(graph, obj->h3a_write_node, replicate, 3);

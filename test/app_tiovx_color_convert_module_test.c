@@ -234,8 +234,11 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/baboon_640x480_rgb.bmp";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_640x480_i420.yuv";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/modules_test/baboon_640x480_rgb.bmp", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/baboon_640x480_i420.yuv", EDGEAI_DATA_PATH);
 
     vx_image input_o, output_o;
 
@@ -274,11 +277,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);

@@ -65,20 +65,20 @@ static vx_status tiovx_dl_pre_proc_module_create_config(vx_context context, TIOV
 {
     vx_status status = VX_SUCCESS;
 
-    tivxDLPreProcParams *params;
+    tivxDLPreProcArmv8Params *params;
     vx_map_id map_id;
 
-    obj->config = vxCreateUserDataObject(context, "tivxDLPreProcParams", sizeof(tivxDLPreProcParams), NULL );
+    obj->config = vxCreateUserDataObject(context, "tivxDLPreProcArmv8Params", sizeof(tivxDLPreProcArmv8Params), NULL );
     status = vxGetStatus((vx_reference)obj->config);
 
     if (VX_SUCCESS == status)
     {
         vxSetReferenceName((vx_reference)obj->config, "dl_pre_proc_config");
 
-        vxMapUserDataObject(obj->config, 0, sizeof(tivxDLPreProcParams), &map_id,
+        vxMapUserDataObject(obj->config, 0, sizeof(tivxDLPreProcArmv8Params), &map_id,
                         (void **)&params, VX_WRITE_ONLY, VX_MEMORY_TYPE_HOST, 0);
 
-        memcpy(params, &obj->params, sizeof(tivxDLPreProcParams));
+        memcpy(params, &obj->params, sizeof(tivxDLPreProcArmv8Params));
 
         vxUnmapUserDataObject(obj->config, map_id);
     }
@@ -137,7 +137,7 @@ static vx_status tiovx_dl_pre_proc_module_create_output(vx_context context, TIOV
 {
     vx_status status = VX_SUCCESS;
 
-    vx_size tensor_sizes[VX_TENSOR_NUMBER_OF_DIMS];
+    vx_size tensor_sizes[TIVX_CONTEXT_MAX_TENSOR_DIMS];
     vx_tensor out_tensor;
     vx_int32 buf, dim;
 
@@ -361,7 +361,7 @@ vx_status tiovx_dl_pre_proc_module_create(vx_graph graph, TIOVXDLPreProcModuleOb
         output = NULL;
     }
 
-    obj->node = tivxDLPreProcNode(graph, obj->config, input, output);
+    obj->node = tivxDLPreProcArmv8Node(graph, obj->config, input, output);
     status = vxGetStatus((vx_reference)obj->node);
 
     if((vx_status)VX_SUCCESS == status)
@@ -532,7 +532,7 @@ vx_status tiovx_dl_pre_proc_module_add_write_output_node(vx_graph graph, TIOVXDL
 
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(obj->write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(obj->write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, obj->write_node, replicate, 3);

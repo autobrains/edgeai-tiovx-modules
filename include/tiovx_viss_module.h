@@ -73,7 +73,7 @@
  */
 
 #include "tiovx_modules_common.h"
-#include "tiovx_sensor_module.h"
+#include <tiovx_sensor_module.h>
 
 #ifdef __cplusplus
 extern "C" {

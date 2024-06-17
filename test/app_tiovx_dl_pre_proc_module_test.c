@@ -132,7 +132,7 @@ static vx_status app_init(AppObj *obj)
     if(status == VX_SUCCESS)
     {
         tivxHwaLoadKernels(obj->context);
-        tivxImgProcLoadKernels(obj->context);
+        tivxEdgeaiImgProcLoadKernels(obj->context);
     }
 
     if(status == VX_SUCCESS)
@@ -184,7 +184,7 @@ static void app_deinit(AppObj *obj)
 {
     tiovx_dl_pre_proc_module_deinit(&obj->dlPreProcObj);
 
-    tivxImgProcUnLoadKernels(obj->context);
+    tivxEdgeaiImgProcUnLoadKernels(obj->context);
 
     tivxHwaUnLoadKernels(obj->context);
 
@@ -210,7 +210,7 @@ static vx_status app_create_graph(AppObj *obj)
 
     if((vx_status)VX_SUCCESS == status)
     {
-        status = tiovx_dl_pre_proc_module_create(obj->graph, &obj->dlPreProcObj, NULL, TIVX_TARGET_DSP1);
+        status = tiovx_dl_pre_proc_module_create(obj->graph, &obj->dlPreProcObj, NULL, TIVX_TARGET_MPU_0);
     }
 
     graph_parameter_index = 0;
@@ -265,8 +265,11 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/baboon_640x480_nv12.yuv";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/dl-pre-proc-output";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/modules_test/baboon_640x480_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/dl-pre-proc-output", EDGEAI_DATA_PATH);
 
     vx_image input_o, output_o;
 
@@ -305,11 +308,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);

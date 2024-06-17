@@ -324,7 +324,7 @@ vx_status tiovx_dl_color_convert_module_create(vx_graph graph, TIOVXDLColorConve
         output = NULL;
     }
 
-    obj->node = tivxDLColorConvertNode(graph, input, output);
+    obj->node = tivxDLColorConvertArmv8Node(graph, input, output);
     status = vxGetStatus((vx_reference)obj->node);
 
     if((vx_status)VX_SUCCESS == status)
@@ -495,7 +495,7 @@ vx_status tiovx_dl_color_convert_module_add_write_output_node(vx_graph graph, TI
 
     if((vx_status)VX_SUCCESS == status)
     {
-        vxSetNodeTarget(obj->write_node, VX_TARGET_STRING, TIVX_TARGET_A72_0);
+        vxSetNodeTarget(obj->write_node, VX_TARGET_STRING, TIVX_TARGET_MPU_0);
 
         vx_bool replicate[] = { vx_true_e, vx_false_e, vx_false_e};
         vxReplicateNode(graph, obj->write_node, replicate, 3);

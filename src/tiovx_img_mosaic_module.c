@@ -331,7 +331,7 @@ vx_status tiovx_img_mosaic_module_create(vx_graph graph, TIOVXImgMosaicModuleObj
     }
     else
     {
-        printf("[IMG-MOSAIC-MODULE] Unable to create mosaic node! \n");
+        TIOVX_MODULE_ERROR("[IMG-MOSAIC-MODULE] Unable to create mosaic node! \n");
     }
 
     return (status);

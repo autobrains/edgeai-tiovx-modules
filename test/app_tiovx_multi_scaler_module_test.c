@@ -160,6 +160,13 @@ static vx_status app_init(AppObj *obj)
             scalerObj->output[out].height = INPUT_HEIGHT >> (out + 1);
         }
 
+        tiovx_multi_scaler_module_crop_params_init(scalerObj);
+
+        scalerObj->crop_params[0].crop_start_x = INPUT_WIDTH >> 2;
+        scalerObj->crop_params[0].crop_start_y = INPUT_HEIGHT >> 2;
+        scalerObj->crop_params[0].crop_width = INPUT_WIDTH >> 1;
+        scalerObj->crop_params[0].crop_height = INPUT_HEIGHT >> 1;
+
         /* Initialize modules */
         status = tiovx_multi_scaler_module_init(obj->context, scalerObj);
         APP_PRINTF("Scaler Init Done! \n");
@@ -256,6 +263,11 @@ static vx_status app_verify_graph(AppObj *obj)
 
     if((vx_status)VX_SUCCESS == status)
     {
+        status = tiovx_multi_scaler_module_update_crop_params(&obj->scalerObj);
+    }
+
+    if((vx_status)VX_SUCCESS == status)
+    {
         status = tiovx_multi_scaler_module_release_buffers(&obj->scalerObj);
     }
 
@@ -266,9 +278,13 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/baboon_640x480_nv12.yuv";
-    char * output0_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_320x240_nv12_msc_out0.yuv";
-    char * output1_filename = "/opt/edgeai-tiovx-modules/data/output/baboon_160x120_nv12_msc_out1.yuv";
+    char input_filename[100];
+    char output0_filename[100];
+    char output1_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/modules_test/baboon_640x480_nv12.yuv", EDGEAI_DATA_PATH);
+    sprintf(output0_filename, "%s/output/baboon_320x240_nv12_msc_out0.yuv", EDGEAI_DATA_PATH);
+    sprintf(output1_filename, "%s/output/baboon_160x120_nv12_msc_out1.yuv", EDGEAI_DATA_PATH);
 
     vx_image input_o, output0_o, output1_o;
 
@@ -305,11 +321,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);

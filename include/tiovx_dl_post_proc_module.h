@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2021 Texas Instruments Incorporated
+ * Copyright (c) 2023 Texas Instruments Incorporated
  *
  * All rights reserved not granted herein.
  *
@@ -59,11 +59,11 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- #ifndef _TIOVX_DOF_VIZ_MODULE
- #define _TIOVX_DOF_VIZ_MODULE
+#ifndef _TIOVX_DL_POST_PROC_MODULE
+#define _TIOVX_DL_POST_PROC_MODULE
 
-#include "tiovx_modules_common.h"
-#include <TI/hwa_dmpac_dof.h>
+#include <tiovx_modules_common.h>
+#include <tivx_dl_post_proc_host.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,77 +71,41 @@ extern "C" {
 
 typedef struct {
     vx_node node;
+    vx_user_data_object config;
+    tivxDLPostProcParams params;
 
-    /*! Instance of input Image object (flow vector output from DOF)
-     */
-    ImgObj input;
+    /*! Post Proc kernel object */
+    vx_kernel  kernel;
 
-    /*! Instance of output flow vector Image object (24 RGB image) */
-    ImgObj output;
+    ImgObj input_image;
+    TensorObj input_tensor[TIOVX_MODULES_MAX_TENSORS];
+    ImgObj output_image;
 
-    /*! Instance of output confidence Image object (U8 grayscale image) */
-    ImgObj output_confidence_image;
-
-    /* valid range, 0 (low confidence) .. 15 (high confidence) */
-    vx_uint32 confidence_threshold_value;
-    vx_scalar confidence_threshold;
+    /* This tells the actual size of input_tensor array */
+    vx_uint32 num_input_tensors;
 
     /* Input parameters */
     vx_int32 num_channels;
-    vx_int32 width;
-    vx_int32 height;
+    vx_int32 en_out_image_write;
 
-} TIOVXDofVizModuleObj;
+    /* These params are needed only for writing intermediate output */
+    vx_array file_path;
+    vx_array file_prefix;
+    vx_node write_node;
+    vx_user_data_object write_cmd;
 
-/** \brief DOF Viz module init helper function
- *
- * This DOF Viz init helper function will create all the data objects required to create the
- * DOF Viz node
- *
- * \param [in]  context    OpenVX context which must be created using \ref vxCreateContext
- * \param [out] obj        DOF Viz Module object which gets populated with DOF Viz node data objects
- */
-vx_status tiovx_dof_viz_module_init(vx_context context, TIOVXDofVizModuleObj *obj);
+    vx_char output_file_path[TIVX_FILEIO_FILE_PATH_LENGTH];
 
-/** \brief DOF Viz module deinit helper function
- *
- * This DOF Viz deinit helper function will release all the data objects created during the \ref app_init_dof_viz call
- *
- * \param [in,out] obj    DOF Viz Module object which contains DOF Viz node data objects which are released in this function
- *
- */
-vx_status tiovx_dof_viz_module_deinit(TIOVXDofVizModuleObj *obj);
+} TIOVXDLPostProcModuleObj;
 
-/** \brief DOF Viz module delete helper function
- *
- * This DOF Viz delete helper function will delete the DOF Viz node that is created during the \ref app_create_graph_dof_viz call
- *
- * \param [in,out] obj   DOF Viz Module object which contains DOF Viz node objects which are released in this function
- *
- */
-vx_status tiovx_dof_viz_module_delete(TIOVXDofVizModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_init(vx_context context, TIOVXDLPostProcModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_deinit(TIOVXDLPostProcModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_delete(TIOVXDLPostProcModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_create(vx_graph graph, TIOVXDLPostProcModuleObj *obj, vx_object_array input_image_arr, TensorObj input_tensor_arr[], const char* target_string);
+vx_status tiovx_dl_post_proc_module_release_buffers(TIOVXDLPostProcModuleObj *obj);
 
-/** \brief DOF Viz module create helper function
- *
- * This DOF Viz create helper function will create the node using all the data objects created during the \ref app_init_dof_viz call.
- * Internally calls \ref app_create_graph_dof_viz_write_output if en_out_dof_viz_write is set
- *
- * \param [in]     graph          OpenVX graph that has been created using \ref vxCreateGraph and where the DOF Viz node is created
- * \param [in,out] obj            DOF Viz Module object which contains DOF Viz node and write node which are created in this function
- * \param [in]     input_arr      flow vector input object array to DOF Viz node.
- * \param [in]     target_string  Targets on which the Pyramid node should run. Supported values are TIVX_TARGET_DSP1, TIVX_TARGET_DSP2
- *
- */
-vx_status tiovx_dof_viz_module_create(vx_graph graph, TIOVXDofVizModuleObj *obj, vx_object_array input_arr, const char* target_string);
-
-/** \brief DOF Viz module release buffers helper function
- *
- * This DOF Viz helper function will release the buffers alloted during vxVerifyGraph stage
- *
- * \param [in] obj  DOF Viz Module object
- *
- */
-vx_status tiovx_dof_viz_module_release_buffers(TIOVXDofVizModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_add_write_output_node(vx_graph graph, TIOVXDLPostProcModuleObj *obj);
+vx_status tiovx_dl_post_proc_module_send_write_output_cmd(TIOVXDLPostProcModuleObj *obj, vx_uint32 start_frame, vx_uint32 num_frames, vx_uint32 num_skip);
 
 #ifdef __cplusplus
 }

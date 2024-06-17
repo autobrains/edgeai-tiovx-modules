@@ -80,7 +80,7 @@ typedef struct {
 
 } AppObj;
 
-AppObj gAppObj;
+static AppObj gAppObj;
 
 static vx_status app_init(AppObj *obj);
 static void app_deinit(AppObj *obj);
@@ -246,8 +246,11 @@ static vx_status app_run_graph(AppObj *obj)
 {
     vx_status status = VX_SUCCESS;
 
-    char * input_filename = "/opt/edgeai-tiovx-modules/data/input/avp3_1280x720_disparity_s16.raw";
-    char * output_filename = "/opt/edgeai-tiovx-modules/data/output/output_sde_viz_rgb.raw";
+    char input_filename[100];
+    char output_filename[100];
+
+    sprintf(input_filename, "%s/raw_images/modules_test/avp3_1280x720_disparity_s16.raw", EDGEAI_DATA_PATH);
+    sprintf(output_filename, "%s/output/output_sde_viz_rgb.raw", EDGEAI_DATA_PATH);
 
     vx_image  input_o;
     vx_image  output_o;
@@ -280,11 +283,11 @@ static vx_status app_run_graph(AppObj *obj)
     APP_PRINTF("Processing!\n");
     status = vxScheduleGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Schedule Graph failed: %d!\n", status);
+      APP_ERROR("Schedule Graph failed: %d!\n", status);
     }
     status = vxWaitGraph(obj->graph);
     if((vx_status)VX_SUCCESS != status) {
-      APP_PRINTF("Wait Graph failed: %d!\n", status);
+      APP_ERROR("Wait Graph failed: %d!\n", status);
     }
 
     vxGraphParameterDequeueDoneRef(obj->graph, 0, (vx_reference*)&input_o, 1, &num_refs);
