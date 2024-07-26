@@ -513,7 +513,7 @@ vx_status tiovx_multi_scaler_module_create(vx_graph graph, TIOVXMultiScalerModul
         vxSetNodeTarget(obj->node, VX_TARGET_STRING, target_string);
         vxSetReferenceName((vx_reference)obj->node, "scaler_node");
 
-        vx_bool replicate[] = { vx_true_e, vx_true_e, vx_true_e, vx_true_e, vx_true_e, vx_true_e};
+        vx_bool replicate[] = { vx_true_e, vx_true_e, vx_true_e, vx_true_e, vx_true_e, vx_true_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e};
 
         if(output1 == NULL)
             replicate[1] = vx_false_e;
@@ -526,7 +526,7 @@ vx_status tiovx_multi_scaler_module_create(vx_graph graph, TIOVXMultiScalerModul
         if(output4 == NULL)
             replicate[5] = vx_false_e;
 
-        vxReplicateNode(graph, obj->node, replicate, 6);
+        vxReplicateNode(graph, obj->node, replicate, 12);
 
         if(obj->en_multi_scalar_output == 1)
         {

@@ -676,8 +676,8 @@ vx_status tiovx_ldc_module_create(vx_graph graph, TIOVXLDCModuleObj *obj, vx_obj
     {
         vxSetNodeTarget(obj->node, VX_TARGET_STRING, target_string);
 
-        vx_bool replicate[] = { vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_true_e, vx_true_e, vx_false_e};
-        vxReplicateNode(graph, obj->node, replicate, 9);
+        vx_bool replicate[] = { vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e, vx_true_e, vx_true_e, vx_false_e, vx_false_e, vx_false_e, vx_false_e};
+        vxReplicateNode(graph, obj->node, replicate, 12);
     }
     else
     {
