@@ -453,7 +453,19 @@ vx_status tiovx_init_sensor(SensorObj *sensorObj, char *objName)
     else if(strcmp(sensorObj->sensor_name, "SENSOR_SONY_IMX728") == 0)
     {
         sensorObj->sensorParams.dccId=728;
-    }    
+    }
+    else if(strcmp(sensorObj->sensor_name, "SENSOR_OX08D10") == 0)
+    {
+        sensorObj->sensorParams.dccId=8;
+    }
+    else if(strcmp(sensorObj->sensor_name, "SENSOR_SONY_IMX031") == 0)
+    {
+        sensorObj->sensorParams.dccId=31;
+    }
+    else if(strcmp(sensorObj->sensor_name, "SENSOR_SONY_IMX623") == 0)
+    {
+        sensorObj->sensorParams.dccId=623;
+    }
     else
     {
         TIOVX_MODULE_ERROR("[SENSOR-MODULE] Invalid sensor name\n");
